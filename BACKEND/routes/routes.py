@@ -57,7 +57,7 @@ def save_uploaded_file(file_storage, folder='images'):
     unique_filename = f"{name}_{uuid.uuid4().hex[:8]}{ext}"
     
     # Ensure directory exists
-    upload_path = os.path.join(current_app.root_path, 'static', folder)
+    upload_path = os.path.join(current_app.static_folder, folder)
     os.makedirs(upload_path, exist_ok=True)
     
     # Save file

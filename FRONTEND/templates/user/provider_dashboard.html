@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Provider Dashboard - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modern_dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-avatar">
+                {{ current_user.username[:2].upper() }}
+            </div>
+
+            <h1 class="hero-title">Hello, {{ current_user.username }}</h1>
+            <p class="hero-subtitle">Provider Executive Dashboard</p>
+
+            <div class="d-flex gap-3 justify-content-center mt-4">
+                <a href="{{ url_for('availability.manage') }}" class="btn-action btn-primary-soft">
+                    <i class="bi bi-calendar-check-fill"></i> Availability
+                </a>
+                <a href="{{ url_for('service.create') }}" class="btn-action">
+                    <i class="bi bi-plus-lg"></i> New Service
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="bento-grid">
+        <!-- Card 1: Active Services -->
+        <a href="{{ url_for('user.dashboard') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-blue"><i class="bi bi-layers-fill"></i></div>
+                <span class="trend-pill trend-positive">+12.5%</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_services or 0 }}</div>
+                <div class="stat-label">Active Services</div>
+            </div>
+        </a>
+
+        <!-- Card 2: New Orders -->
+        <a href="{{ url_for('user.orders') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-emerald"><i class="bi bi-cart-fill"></i></div>
+                <span class="trend-pill trend-positive">+8.1%</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ orders|length }}</div>
+                <div class="stat-label">Active Orders</div>
+            </div>
+        </a>
+
+        <!-- Card 3: Total Reviews -->
+        <a href="{{ url_for('user.profile', username=current_user.username) }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-amber"><i class="bi bi-chat-square-text-fill"></i></div>
+                <span class="trend-pill trend-neutral">+5.2%</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_reviews or 0 }}</div>
+                <div class="stat-label">Total Reviews</div>
+            </div>
+        </a>
+
+        <!-- Card 4: Rating -->
+        <a href="{{ url_for('user.profile', username=current_user.username) }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-violet"><i class="bi bi-trophy-fill"></i></div>
+                <span class="trend-pill trend-positive">Stable</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ current_user.get_average_rating() }}</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+        </a>
+
+        <!-- Row 2: Analytics -->
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Earnings Trend</span>
+                <i class="bi bi-currency-dollar text-muted"></i>
+            </div>
+            <div class="graph-wrapper">
+                {% if earnings_graph %}
+                <img src="data:image/png;base64,{{ earnings_graph }}" class="graph-img">
+                {% else %}
+                <span class="text-secondary small">No earnings data available.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Top Services</span>
+                <i class="bi bi-bar-chart-fill text-muted"></i>
+            </div>
+            <div class="graph-wrapper">
+                {% if services_graph %}
+                <img src="data:image/png;base64,{{ services_graph }}" class="graph-img">
+                {% else %}
+                <span class="text-secondary small">No service data available.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 3: Schedule -->
+        <div class="panel span-4">
+            <div class="panel-header">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="panel-title">Today's Schedule</span>
+                    <span class="status status-active">{{ todays_bookings|length }} Sessions</span>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                {% if todays_bookings %}
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Client</th>
+                            <th>Service</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in todays_bookings %}
+                        {% set start_local = booking.slot.start_time | to_ist %}
+                        {% set end_local = booking.slot.end_time | to_ist %}
+                        <tr>
+                            <td style="font-weight:600;">{{ start_local.strftime('%I:%M %p') }} - {{
+                                end_local.strftime('%I:%M %p') }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ booking.client.get_avatar_url() }}" width="24" height="24"
+                                        class="rounded-circle">
+                                    <span>{{ booking.client.username }}</span>
+                                </div>
+                            </td>
+                            <td>{{ booking.service.title if booking.service else 'Session' }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('user.chats') }}" class="btn-action">Join Chat</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-secondary">
+                    <p class="mb-0">No sessions scheduled for today.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 4: Recent Orders -->
+        <div class="panel span-4">
+            <div class="panel-header">
+                <span class="panel-title">Recent Orders</span>
+                <a href="{{ url_for('user.orders') }}" class="btn-action">View All</a>
+            </div>
+            <div style="overflow-x: auto;">
+                {% if orders %}
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Service</th>
+                            <th>Buyer</th>
+                            <th>Date</th>
+                            <th class="text-end">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr onclick="window.location='{{ url_for('user.order_detail', order_id=order.id) }}'"
+                            style="cursor:pointer;">
+                            <td class="text-secondary" style="font-family:monospace;">#{{ order.id }}</td>
+                            <td style="font-weight:600;">{{ order.service.title }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ order.buyer.get_avatar_url() }}" width="24" height="24"
+                                        class="rounded-circle">
+                                    <span>{{ order.buyer.username }}</span>
+                                </div>
+                            </td>
+                            <td class="text-secondary">{{ order.created_at.strftime('%b %d') }}</td>
+                            <td class="text-end">
+                                <span
+                                    class="status {{ 'status-pending' if order.status=='pending' else 'status-active' if order.status=='in_progress' else 'status-completed' }}">
+                                    {{ order.status|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-secondary">
+                    <p class="mb-0">No stats to display yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

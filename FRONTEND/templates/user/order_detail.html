@@ -1,0 +1,786 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.id }} - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+<style>
+    :root {
+        --workroom-bg: #f8fafc;
+        --workroom-card-bg: #ffffff;
+        --workroom-border: #e2e8f0;
+        --chat-me-bg: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        --chat-me-text: #ffffff;
+        --chat-them-bg: #f1f5f9;
+        --chat-them-text: #1e293b;
+        --accent-color: #4f46e5;
+    }
+
+    [data-bs-theme="dark"] {
+        --workroom-bg: #0f172a;
+        --workroom-card-bg: #1e293b;
+        --workroom-border: #334155;
+        --chat-me-bg: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+        --chat-them-bg: #334155;
+        --chat-them-text: #e2e8f0;
+        --accent-color: #818cf8;
+    }
+
+    body {
+        background-color: var(--workroom-bg);
+    }
+
+    /* Modern Card Styling */
+    .workroom-card {
+        background: var(--workroom-card-bg);
+        border: 1px solid var(--workroom-border);
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+
+    /* Chat Area */
+    .chat-container {
+        height: 600px;
+        /* Fixed height again for reliability */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background-color: var(--workroom-bg);
+        background-image: radial-gradient(var(--workroom-border) 1px, transparent 1px);
+        background-size: 24px 24px;
+        scroll-behavior: smooth;
+    }
+
+    /* Chat Bubbles */
+    .chat-bubble {
+        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        position: relative;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .chat-bubble.me {
+        background: var(--chat-me-bg);
+        color: var(--chat-me-text);
+        border-bottom-right-radius: 0.25rem;
+        margin-left: auto;
+    }
+
+    .chat-bubble.them {
+        background: var(--chat-them-bg);
+        color: var(--chat-them-text);
+        border-bottom-left-radius: 0.25rem;
+        border: 1px solid var(--workroom-border);
+    }
+
+    .chat-meta {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        color: var(--secondary-color);
+        opacity: 0.8;
+    }
+
+    /* Sidebar Details */
+    .project-card-header {
+        background: var(--workroom-card-bg);
+        border-bottom: 1px solid var(--workroom-border);
+        padding: 1.5rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    /* Input Area */
+    .chat-input-area {
+        background: var(--workroom-card-bg);
+        padding: 1rem;
+        border-top: 1px solid var(--workroom-border);
+    }
+
+    .chat-input {
+        background-color: var(--workroom-bg);
+        border: 1px solid var(--workroom-border);
+        color: var(--bs-body-color);
+        border-radius: 2rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    .chat-input:focus {
+        background-color: var(--workroom-card-bg);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        border-color: var(--accent-color);
+    }
+
+    /* Status Badges */
+    .badge-status {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Scrollbar Polish */
+    .chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Navbar Spacer -->
+<div style="margin-top: 80px;"></div>
+
+<div class="container py-4">
+    <!-- Header -->
+    {% if booking and (booking.status == 'cancelled' or booking.status == 'rejected') and current_user.id ==
+    order.buyer_id %}
+    <div
+        class="alert alert-danger fade-in-up mb-4 shadow-sm border-danger border-opacity-25 d-flex align-items-center rounded-3">
+        <div class="bg-danger bg-opacity-10 p-2 rounded-circle me-3 text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-1">Booking Declined</h6>
+            <p class="mb-0 small">The provider could not accept your previous slot. Please select a new time.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4 align-items-center fade-in-up">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url_for('user.chats') }}"
+                    class="btn btn-outline-secondary rounded-circle shadow-sm p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">Project Workspace</h2>
+                    <div class="d-flex align-items-center gap-2 text-muted small mt-1">
+                        <i class="bi bi-hash"></i>Order {{ order.id }}
+                        <span class="mx-1">•</span>
+                        Started {{ order.created_at.strftime('%b %d') }}
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            {% if order.status == 'pending' %}
+            {% if not booking or booking.status == 'cancelled' or booking.status == 'rejected' %}
+            <span class="badge-status bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                <i class="bi bi-calendar-plus"></i> Needs Scheduling
+            </span>
+            {% else %}
+            <span class="badge-status bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                <i class="bi bi-hourglass-split"></i> Pending Acceptance
+            </span>
+            {% endif %}
+            {% elif order.status == 'in_progress' %}
+            <span class="badge-status bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                <i class="bi bi-lightning-charge-fill"></i> In Progress
+            </span>
+            {% elif order.status == 'completed' %}
+            <span class="badge-status bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
+            {% else %}
+            <span class="badge-status bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                <i class="bi bi-x-circle-fill"></i> Cancelled
+            </span>
+            {% if order.rejection_reason %}
+            <div class="mt-3 p-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 text-start">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-info-circle-fill text-danger me-2 mt-1"></i>
+                    <div>
+                        <h6 class="mb-1 fw-bold text-danger">Rejection Reason</h6>
+                        <p class="mb-0 small text-dark">{{ order.rejection_reason }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+
+            {% if order.certificate %}
+            <div class="mt-3 p-3 rounded-3 shadow-sm text-start"
+                style="border: 1px solid var(--accent-color); background-color: var(--workroom-bg);">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="fs-5 me-2">🎓</span>
+                    <h6 class="mb-0 fw-bold">Certificate of Completion Issued</h6>
+                </div>
+                <div class="small text-muted mb-2">
+                    <div>Certificate ID: <span class="fw-bold text-dark">{{ order.certificate.cert_id }}</span></div>
+                    <div>Issued on: {{ order.certificate.issued_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                {% if current_user.id == order.buyer_id or current_user.id == order.seller_id %}
+                <a href="{{ url_for('user.download_certificate', cert_id=order.certificate.cert_id) }}"
+                    class="btn btn-sm w-100 fw-bold text-dark"
+                    style="background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%); border: none;">
+                    ⬇ Download Certificate
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar: Details -->
+        <div class="col-lg-4 order-lg-2">
+            <!-- Project Card -->
+            <div class="workroom-card mb-4 fade-in-up delay-100 position-sticky" style="top: 100px;">
+                <div class="project-card-header">
+                    <h5 class="fw-bold mb-0">Details</h5>
+                </div>
+                <div class="p-4">
+                    <!-- Service Info -->
+                    <div class="d-flex align-items-start mb-4">
+                        <img src="{{ order.service.get_image_url() }}"
+                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80';"
+                            class="rounded-3 me-3 object-fit-cover border border-secondary border-opacity-25" width="64"
+                            height="64">
+                        <div>
+                            <h6 class="fw-bold mb-1 line-clamp-2">{{ order.service.title }}</h6>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ order.budget_tier }}
+                                Tier</span>
+                        </div>
+                    </div>
+
+                    <!-- Session Status with nicer UI -->
+                    <div class="mb-4">
+                        <span class="info-label">Current Session</span>
+                        {% if booking and booking.status not in ['cancelled', 'rejected'] %}
+                        <div class="p-3 rounded-3 border"
+                            style="background-color: var(--workroom-bg); border-color: var(--workroom-border) !important;">
+                            <div class="d-flex align-items-center text-success fw-bold mb-2">
+                                <i class="bi bi-calendar-check-fill me-2"></i>Scheduled
+                            </div>
+                            {% set start_local = booking.slot.start_time | to_ist %}
+                            <div class="fs-5 fw-bold text-dark mb-1">{{ start_local.strftime('%I:%M %p') }}</div>
+                            <div class="small text-muted">{{ start_local.strftime('%A, %b %d, %Y') }} (IST)</div>
+                        </div>
+                        {% else %}
+                        <div class="p-3 rounded-3 border border-warning border-opacity-50"
+                            style="background-color: rgba(245, 158, 11, 0.05);">
+                            <div class="d-flex align-items-center text-warning fw-bold mb-2">
+                                <i class="bi bi-calendar-event me-2"></i>Needs Scheduling
+                            </div>
+
+                            {% if current_user.id == order.buyer_id %}
+                            <p class="small text-muted mb-3">Please select a time slot to begin.</p>
+                            <button class="btn btn-warning btn-sm w-100 rounded-pill shadow-sm fw-bold text-dark"
+                                data-bs-toggle="modal" data-bs-target="#calendarModal">
+                                Book Session
+                            </button>
+                            {% else %}
+                            <p class="small text-muted mb-0 fst-italic">Waiting for client to book.</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="pt-3 border-top" style="border-color: var(--workroom-border) !important;">
+                        <span class="info-label">Total Value</span>
+                        <div class="fs-2 fw-bold" style="color: var(--accent-color);">₹{{
+                            "%.0f"|format(order.total_price) }}</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                {% if current_user.id == order.seller_id %}
+                <div class="card-footer bg-white p-4 border-top">
+                    {% if order.status == 'pending' %}
+                    <h6 class="fw-bold mb-3">Action Required</h6>
+
+                    {% if booking and booking.status != 'confirmed' %}
+                    <div class="alert alert-warning small mb-3 border-0 bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i> Please approve the booking slot in
+                        <strong>Manage Availability</strong> before accepting the order.
+                    </div>
+                    <button class="btn btn-secondary w-100 py-2 rounded-pill disabled" disabled>
+                        <i class="bi bi-lock-fill me-2"></i>Accept Order
+                    </button>
+                    {% else %}
+                    <form action="{{ url_for('user.order_action', order_id=order.id, action='accept') }}" method="POST">
+                        <button class="btn btn-success w-100 py-2 rounded-pill shadow-sm btn-sweep">
+                            <i class="bi bi-check-circle me-2"></i>Accept Order
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Reject Order Button -->
+                    <button class="btn btn-outline-danger w-100 py-2 rounded-pill mt-2" data-bs-toggle="modal"
+                        data-bs-target="#rejectOrderModal">
+                        <i class="bi bi-x-circle me-2"></i>Reject Order
+                    </button>
+                    {% elif order.status == 'in_progress' %}
+                    <h6 class="fw-bold mb-3">Project Status</h6>
+                    <button class="btn btn-primary w-100 py-2 rounded-pill shadow-sm btn-sweep" data-bs-toggle="modal"
+                        data-bs-target="#completeOrderModal">
+                        <i class="bi bi-award-fill me-2"></i>Mark as Complete
+                    </button>
+                    <p class="text-muted small mt-2 mb-0 text-center">
+                        <i class="bi bi-info-circle me-1"></i>Issuing a certificate requires completion.
+                    </p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Certificate Section (Sidebar) -->
+                {% if order.certificate and (current_user.id == order.buyer_id or current_user.id == order.seller_id) %}
+                <div class="card-footer p-4 border-top">
+                    <div class="text-center">
+                        <div
+                            class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle p-3 mb-3">
+                            <i class="bi bi-award-fill fs-2"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Certificate Issued</h6>
+                        <p class="text-muted small mb-3">ID: {{ order.certificate.cert_id }} • {{
+                            order.certificate.issued_at.strftime('%b %d, %Y') }}</p>
+
+                        <a href="{{ url_for('user.download_certificate', cert_id=order.certificate.cert_id) }}"
+                            class="btn w-100 py-2 rounded-pill shadow-sm fw-bold text-dark"
+                            style="background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%); border: none;">
+                            <i class="bi bi-file-earmark-pdf-fill me-2"></i>Download Certificate
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-lg-8 order-lg-1">
+            <div class="workroom-card fade-in-up delay-200 chat-container">
+                <div class="project-card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                            <i class="bi bi-chat-dots-fill text-primary" style="font-size: 1.2rem;"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Live Chat</h5>
+                            <span class="small text-muted">
+                                {% if order.status == 'in_progress' %}
+                                <span class="text-secondary" id="partner-status-indicator">● Checking...</span>
+                                <span class="small text-muted" id="partner-status-text"></span>
+                                {% else %}
+                                History Mode
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    {% if order.status == 'pending' %}
+                    <div
+                        class="d-flex h-100 align-items-center justify-content-center flex-column text-muted opacity-75">
+                        <div class="bg-light p-4 rounded-circle mb-3 border">
+                            <i class="bi bi-lock-fill fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold">Chat Locked</h5>
+                        <p class="small text-center px-4">Conversation will open once the order is accepted.</p>
+                    </div>
+                    {% elif messages|length == 0 %}
+                    <div class="text-center py-5 mt-5">
+                        <div class="mb-3">👋</div>
+                        <h5 class="fw-bold fs-6">No messages yet</h5>
+                        <p class="text-muted small">Start the conversation by saying hello!</p>
+                    </div>
+                    {% else %}
+                    {% for msg in messages %}
+                    <div
+                        class="d-flex mb-4 {{ 'justify-content-end' if msg.sender_id == current_user.id else 'justify-content-start' }} fade-in-up">
+                        {% if msg.sender_id != current_user.id %}
+                        {% set sender = order.buyer if msg.sender_id == order.buyer.id else order.service.provider %}
+                        <img src="{{ sender.get_avatar_url() }}"
+                            class="rounded-circle me-2 align-self-end shadow-sm border border-white" width="32"
+                            height="32" style="margin-bottom: 20px;">
+                        {% endif %}
+
+                        <div class="d-flex flex-column {{ 'align-items-end' if msg.sender_id == current_user.id else 'align-items-start' }}"
+                            style="max-width: 75%;">
+                            <div class="chat-bubble {{ 'me' if msg.sender_id == current_user.id else 'them' }}">
+                                {{ msg.content }}
+                            </div>
+                            <span class="chat-meta">{{ (msg.created_at|to_ist).strftime('%I:%M %p') }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                {% if order.status == 'in_progress' %}
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" id="message-input" class="form-control chat-input py-3 shadow-none"
+                            placeholder="Type your message here..." autocomplete="off">
+                        <button id="send-btn"
+                            class="btn btn-primary rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center transition-transform hover-scale"
+                            style="width: 48px; height: 48px; background: var(--chat-me-bg); border: none;">
+                            <i class="bi bi-send-fill fs-5 ps-1"></i>
+                        </button>
+                    </div>
+                </div>
+                {% elif order.status == 'completed' %}
+                <div class="chat-input-area bg-light text-center py-4">
+                    <div class="text-muted d-flex align-items-center justify-content-center flex-column">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle mb-2 text-success">
+                            <i class="bi bi-check-circle-fill fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Order Completed</h6>
+                        <p class="small mb-0 opacity-75">Chat is closed for this order. Start a new order to chat again.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div> <!-- Closing Row -->
+    </div> <!-- Closing Container -->
+
+    <!-- Reject Order Confirmation Modal -->
+    <div class="modal fade" id="rejectOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 bg-danger bg-opacity-10 p-4">
+                    <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle-fill me-2"></i>Reject Order
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4 text-danger display-1">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Reject This Order?</h4>
+                    <p class="text-muted mb-4 lead fs-6">
+                        This will <span class="fw-bold text-danger">cancel the order</span> and automatically
+                        <span class="fw-bold text-success">refund the buyer's payment</span> to their wallet.
+                    </p>
+                    <form action="{{ url_for('user.order_action', order_id=order.id, action='reject') }}" method="POST">
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-semibold small text-muted">Reason for rejection <span
+                                    class="text-danger">*</span></label>
+                            <textarea name="reason" class="form-control rounded-3 border-0 bg-light" rows="3"
+                                placeholder="e.g. Schedule conflict, outside my expertise..." required></textarea>
+                            <small class="text-muted">Please provide a clear reason for rejecting this order.</small>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger rounded-pill py-3 fw-bold shadow-sm">
+                                <i class="bi bi-x-circle me-2"></i>Confirm Rejection & Refund Buyer
+                            </button>
+                            <button type="button" class="btn btn-light rounded-pill py-2"
+                                data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Completion Confirmation Modal -->
+    <div class="modal fade" id="completeOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 bg-light p-4">
+                    <h5 class="modal-title fw-bold">Complete Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4 text-success display-1">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Mark as Complete?</h4>
+                    <p class="text-muted mb-4 lead fs-6">
+                        This will finalize the order and automatically issue an official
+                        <span class="fw-bold text-dark" style="background-color: #FFD700; padding: 0 4px;">Certificate
+                            of Completion</span>
+                        to the buyer.
+                    </p>
+
+                    <form action="{{ url_for('user.order_action', order_id=order.id, action='complete') }}"
+                        method="POST">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary rounded-pill py-3 fw-bold shadow-sm">
+                                Confirm & Issue Certificate
+                            </button>
+                            <button type="button" class="btn btn-light rounded-pill py-2"
+                                data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Modal -->
+    <div class="modal fade" id="calendarModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 bg-light p-4">
+                    <div>
+                        <h5 class="modal-title fw-bold">Select a Session</h5>
+                        <p class="text-muted small mb-0">Book a time with {{ order.service.provider.username }}</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info border-0 d-flex align-items-center mb-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>Times are displayed in your local time zone.</div>
+                    </div>
+                    <div id="bookingCalendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Booking Modal -->
+    <div class="modal fade" id="confirmBookingModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 bg-light p-4">
+                    <h5 class="modal-title fw-bold">Confirm Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('availability.book_slot') }}" method="POST">
+                    <input type="hidden" name="slot_id" id="selectedSlotId">
+                    <input type="hidden" name="service_id" value="{{ order.service.id }}">
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-4">
+                            <div
+                                class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3">
+                                <i class="bi bi-calendar-check fs-1"></i>
+                            </div>
+                            <h4 class="fw-bold" id="selectedTimeDisplay"></h4>
+                            <p class="text-muted">with {{ order.service.provider.username }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Notes for Provider</label>
+                            <textarea class="form-control bg-light border-0 rounded-3" name="notes" rows="3"
+                                placeholder="What would you like to discuss?"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0 justify-content-center gap-2">
+                        <button type="button" class="btn btn-light rounded-pill px-4"
+                            data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 btn-sweep">Confirm
+                            Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block extra_js %}
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+    <!-- Server data for JavaScript -->
+    <div id="order-data" class="d-none" data-order-id="{{ order.id }}" data-current-user-id="{{ current_user.id }}"
+        data-partner-id="{{ order.seller_id if current_user.id == order.buyer_id else order.buyer_id }}"
+        data-order-status="{{ order.status }}" data-provider-id="{{ order.service.provider.id }}">
+    </div>
+
+    <script>
+        // Read server data from data attributes (no Jinja in JS = no editor errors)
+        const orderData = document.getElementById('order-data').dataset;
+        const orderId = parseInt(orderData.orderId);
+        const currentUserId = parseInt(orderData.currentUserId);
+        const partnerId = parseInt(orderData.partnerId);
+        const orderStatus = orderData.orderStatus;
+        const socket = io();
+
+        socket.on('connect', function () {
+            socket.emit('join', { order_id: orderId });
+
+            // Request Partner Status
+            socket.emit('check_users_status', { user_ids: [partnerId] });
+
+            // Timeout fallback: if no status response in 4 seconds, assume offline
+            setTimeout(() => {
+                const ind = document.getElementById('partner-status-indicator');
+                if (ind && ind.innerHTML.includes('Checking')) {
+                    updatePartnerStatus('offline');
+                }
+            }, 4000);
+        });
+
+
+        socket.on('disconnect', function () {
+            const ind = document.getElementById('partner-status-indicator');
+            const txt = document.getElementById('partner-status-text');
+            if (ind) {
+                ind.className = 'text-warning fw-bold';
+                ind.innerHTML = '⚠ Reconnecting...';
+            }
+        });
+
+        // Handle batch status response (initial load)
+        socket.on('users_status_response', (data) => {
+            updatePartnerStatus(data[partnerId]);
+        });
+
+        // Handle real-time status updates
+        socket.on('user_status', (data) => {
+            // Need to parse IDs as integers for comparison
+            if (parseInt(data.user_id) === parseInt(partnerId)) {
+                updatePartnerStatus(data.status);
+            }
+        });
+
+        function updatePartnerStatus(status) {
+            const ind = document.getElementById('partner-status-indicator');
+            const txt = document.getElementById('partner-status-text');
+
+            if (!ind) return;
+
+            if (status === 'online') {
+                ind.className = 'text-success fw-bold transition-all';
+                ind.innerHTML = '● Online';
+                if (txt) txt.innerHTML = 'and ready to chat';
+            } else {
+                ind.className = 'text-muted transition-all';
+                ind.innerHTML = '● Offline';
+                if (txt) txt.innerHTML = 'currently away';
+            }
+        }
+
+        socket.on('new_message', function (data) {
+            const chatContainer = document.getElementById('chat-messages');
+            const isOwnMessage = data.sender_id === currentUserId;
+            const msgDiv = document.createElement('div');
+            // REMOVED 'fade-in-up' CLASS TO FIX INVISIBLE MESSAGE BUG
+            // Dynamic messages should appear instantly.
+            msgDiv.className = `d-flex mb-4 ${isOwnMessage ? 'justify-content-end' : 'justify-content-start'}`;
+
+            let html = '';
+            if (!isOwnMessage) {
+                // Use a default avatar if we don't have the URL, or try to infer it. 
+                // Ideally data.sender_avatar would be nice, but for now we use a generic placeholder or try to grab it from DOM if possible.
+                // Let's use a nice generic icon for now to be safe.
+                html += `<div class="rounded-circle me-2 align-self-end bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center border border-white shadow-sm" style="width: 32px; height: 32px; margin-bottom: 20px;"><i class="bi bi-person-fill small text-secondary"></i></div>`;
+            }
+
+            html += `
+            <div class="d-flex flex-column ${isOwnMessage ? 'align-items-end' : 'align-items-start'}" style="max-width: 75%;">
+                <div class="chat-bubble ${isOwnMessage ? 'me' : 'them'}">
+                    ${data.content}
+                </div>
+                <span class="chat-meta">${data.time_display || 'Just now'}</span>
+            </div>
+        `;
+
+            msgDiv.innerHTML = html;
+            chatContainer.appendChild(msgDiv);
+
+            // No need for requestAnimationFrame anymore since we removed the fade class
+            // Just ensure scroll happens
+
+            // Use setTimeout to ensure DOM render is complete before scrolling
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            if (!input.value.trim() || orderStatus === 'pending') return;
+            socket.emit('send_message', { order_id: orderId, content: input.value.trim() });
+            input.value = '';
+        }
+
+        document.getElementById('send-btn')?.addEventListener('click', sendMessage);
+        document.getElementById('message-input')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        // Calendar Logic
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('bookingCalendar');
+            var calendarModal = document.getElementById('calendarModal');
+            var confirmModal = new bootstrap.Modal(document.getElementById('confirmBookingModal'));
+            var calendar = null;
+
+            if (calendarModal) {
+                calendarModal.addEventListener('shown.bs.modal', function () {
+                    if (calendar) { calendar.render(); return; }
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'timeGridWeek',
+                        timeZone: 'local',
+                        allDaySlot: false,
+                        validRange: {
+                            start: new Date().toISOString().split('T')[0] // Start from today
+                        },
+                        slotMinTime: '08:00:00',
+                        slotMaxTime: '22:00:00',
+                        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                        events: '/availability/provider/' + orderData.providerId + '/slots',
+                        eventClick: function (info) {
+                            const slot = info.event;
+                            if (slot.extendedProps.booked) return;
+
+                            document.getElementById('selectedSlotId').value = slot.id;
+                            const start = slot.start.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                            const end = slot.end.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
+                            document.getElementById('selectedTimeDisplay').textContent = `${start} - ${end}`;
+                            bootstrap.Modal.getInstance(calendarModal).hide();
+                            confirmModal.show();
+                        },
+                        eventDidMount: function (info) {
+                            if (info.event.extendedProps.booked) {
+                                // Style for booked slots
+                                info.el.style.opacity = '0.7';
+                                info.el.style.cursor = 'not-allowed';
+                            } else {
+                                // Style for available slots
+                                info.el.style.backgroundColor = '#10b981';
+                                info.el.style.borderColor = '#10b981';
+                                info.el.style.cursor = 'pointer';
+                            }
+                        }
+                    });
+                    calendar.render();
+                });
+            }
+        });
+    </script>
+    {% endblock %}

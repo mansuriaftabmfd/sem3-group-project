@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - SkillVerse{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 bg-light" style="margin-top: 60px;">
+    <!-- Header -->
+    <div class="bg-white border-bottom py-5">
+        <div class="container fade-in-up">
+            <h1 class="fw-bold mb-2">Account Settings</h1>
+            <p class="text-muted mb-0">Manage your profile, security, and portfolio.</p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-lg-8 mx-auto">
+                <!-- Profile Settings -->
+                <div class="card border-0 shadow-lg rounded-4 mb-4 fade-in-up delay-100">
+                    <div class="card-header bg-white border-0 py-4 px-4">
+                        <h5 class="fw-bold mb-0">Profile Information</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="settingsForm" method="POST" action="{{ url_for('user.settings') }}"
+                            enctype="multipart/form-data">
+                            <!-- Avatar Upload -->
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="position-relative me-4">
+                                    <img id="avatar-preview" src="{{ current_user.get_avatar_url() }}"
+                                        class="rounded-circle shadow-sm object-fit-cover border"
+                                        style="width: 100px; height: 100px;" alt="Avatar">
+                                    <div class="position-absolute bottom-0 end-0">
+                                        <label for="avatar-input"
+                                            class="btn btn-primary btn-sm rounded-circle shadow-sm"
+                                            style="width: 32px; height: 32px; padding: 0.25rem;">
+                                            <i class="bi bi-camera-fill"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Profile Picture</h6>
+                                    <p class="text-muted small mb-0">PNG, JPG up to 5MB</p>
+                                </div>
+                                <input type="file" class="d-none" name="avatar" id="avatar-input" accept="image/*">
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Full Name</label>
+                                    <input type="text" class="form-control bg-light border-0 py-3" name="full_name"
+                                        id="full_name" value="{{ current_user.full_name or '' }}"
+                                        placeholder="John Doe">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Phone</label>
+                                    <input type="tel" class="form-control bg-light border-0 py-3" name="phone"
+                                        id="phone" value="{{ current_user.phone or '' }}" placeholder="+1 234 567 8900">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Bio</label>
+                                    <textarea class="form-control bg-light border-0 py-3" name="bio" rows="4"
+                                        placeholder="Tell us about yourself...">{{ current_user.bio or '' }}</textarea>
+                                </div>
+                            </div>
+
+                            <hr class="my-5 border-light">
+
+                            <h5 class="fw-bold mb-4">Security</h5>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Current
+                                        Password</label>
+                                    <input type="password" class="form-control bg-light border-0 py-3"
+                                        name="current_password" placeholder="••••••••">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">New
+                                        Password</label>
+                                    <input type="password" class="form-control bg-light border-0 py-3"
+                                        name="new_password" placeholder="Leave blank to keep current">
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="submit"
+                                    class="btn btn-primary rounded-pill px-5 py-3 btn-sweep shadow-sm fw-bold">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Portfolio Settings -->
+                <div class="card border-0 shadow-lg rounded-4 fade-in-up delay-200">
+                    <div
+                        class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1">Project Showcase</h5>
+                            <p class="text-muted small mb-0">Add your best work to your profile</p>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Add Project Form -->
+                        <div class="bg-light rounded-4 p-4 mb-4 border border-dashed">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>Add New Project</h6>
+                            <form method="POST" action="{{ url_for('user.add_portfolio') }}"
+                                enctype="multipart/form-data">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control border-0 shadow-sm" name="title"
+                                            placeholder="Project Title *" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="url" class="form-control border-0 shadow-sm" name="link"
+                                            placeholder="Project Link (https://...)">
+                                    </div>
+                                    <div class="col-12">
+                                        <textarea class="form-control border-0 shadow-sm" name="description" rows="2"
+                                            placeholder="Brief description..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="flex-grow-1">
+                                                <input type="file" class="form-control border-0 shadow-sm" name="image"
+                                                    id="portfolio-input" accept="image/*">
+                                            </div>
+                                            <button type="submit" class="btn btn-dark rounded-pill px-4 shadow-sm">Add
+                                                Project</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div id="portfolio-preview-container" class="mt-2" style="display: none;">
+                                            <img id="portfolio-preview" src=""
+                                                class="rounded shadow-sm object-fit-cover" style="height: 120px;"
+                                                alt="Preview">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Existing Projects -->
+                        {% if current_user.portfolio.count() > 0 %}
+                        <div class="row g-3">
+                            {% for project in current_user.portfolio.all() %}
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm h-100 overflow-hidden group">
+                                    <div class="position-relative">
+                                        {% if project.image_url %}
+                                        <img src="{{ url_for('static', filename='portfolio/' + project.image_url) }}"
+                                            class="card-img-top object-fit-cover" style="height: 160px;"
+                                            alt="{{ project.title }}">
+                                        {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center"
+                                            style="height: 160px;">
+                                            <i class="bi bi-image text-muted fs-4"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div class="position-absolute top-0 end-0 m-2">
+                                            <form method="POST"
+                                                action="{{ url_for('user.delete_portfolio', project_id=project.id) }}"
+                                                class="d-inline">
+                                                <button type="submit"
+                                                    class="btn btn-danger btn-sm rounded-circle shadow-sm"
+                                                    onclick="return confirm('Delete this project?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <h6 class="fw-bold mb-1 text-truncate">{{ project.title }}</h6>
+                                        <p class="text-muted small mb-2 line-clamp-2">{{ project.description or 'No
+                                            description' }}</p>
+                                        {% if project.link %}
+                                        <a href="{{ project.link }}" target="_blank"
+                                            class="small text-primary text-decoration-none fw-bold">
+                                            View Project <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-0">No projects added to your showcase.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+        border-color: #dee2e6 !important;
+    }
+</style>
+
+<script>
+    // Avatar preview
+    document.getElementById('avatar-input').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                document.getElementById('avatar-preview').src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Portfolio preview
+    const portfolioInput = document.getElementById('portfolio-input');
+    if (portfolioInput) {
+        portfolioInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const previewContainer = document.getElementById('portfolio-preview-container');
+            const preview = document.getElementById('portfolio-preview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+
+
+    // Form Validation
+    document.getElementById('settingsForm').addEventListener('submit', function (event) {
+        const fullName = document.getElementById('full_name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        let isValid = true;
+        let errorMessage = "";
+
+        // Validate Full Name
+        if (fullName.length < 3) {
+            errorMessage += "Full Name must be at least 3 characters long.\n";
+            isValid = false;
+        }
+
+        // Validate Phone Number
+        // Regex allows optional + at start, then digits/spaces/dashes. Check for at least 10 actual digits.
+        const phoneRegex = /^[+]?[\d\s-]{10,20}$/;
+        const digitCount = (phone.match(/\d/g) || []).length;
+
+        if (!phoneRegex.test(phone) || digitCount < 10) {
+            errorMessage += "Please enter a valid phone number (at least 10 digits).\n";
+            isValid = false;
+        }
+
+        if (!isValid) {
+            event.preventDefault(); // Stop form submission
+            alert(errorMessage);
+        }
+    });
+</script>
+{% endblock %}

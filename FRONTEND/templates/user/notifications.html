@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - SkillVerse{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 bg-surface-secondary py-5" style="margin-top: 60px;">
+    <div class="container" style="max-width: 800px;">
+
+        <!-- Header Actions -->
+        <div class="d-flex justify-content-between align-items-end mb-4 fade-in-up">
+            <div>
+                <h2 class="fw-bold text-heading ls-tight mb-1">Notifications</h2>
+                <p class="text-muted text-sm mb-0">Stay updated with your latest activity.</p>
+            </div>
+            <div class="d-flex gap-2">
+                {% if notifications %}
+                <button onclick="clearAllNotifications()"
+                    class="btn btn-sm btn-neutral border shadow-sm rounded-pill text-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-trash"></i> <span>Clear</span>
+                </button>
+                {% endif %}
+                <a href="{{ url_for('user.dashboard') }}"
+                    class="btn btn-sm btn-neutral border shadow-sm rounded-pill d-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i> <span>Dashboard</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Notification Feed -->
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden fade-in-up delay-100">
+            {% if notifications %}
+            <div class="list-group list-group-flush" id="notificationFeed">
+                {% for notification in notifications %}
+                <div class="list-group-item p-4 border-bottom notification-item position-relative transition-all"
+                    id="notification-{{ notification.id }}">
+                    <div class="d-flex gap-4">
+                        <!-- Polished Icon System -->
+                        <div class="flex-shrink-0 pt-1 position-relative">
+                            {% if 'order' in notification.message|lower %}
+                            <div
+                                class="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center">
+                                <i class="bi bi-bag-fill fs-5"></i>
+                            </div>
+                            {% elif 'booking' in notification.message|lower or 'session' in notification.message|lower
+                            %}
+                            <div
+                                class="avatar rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center">
+                                <i class="bi bi-calendar-check-fill fs-5"></i>
+                            </div>
+                            {% elif 'message' in notification.message|lower or 'chat' in notification.message|lower %}
+                            <div
+                                class="avatar rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center">
+                                <i class="bi bi-chat-dots-fill fs-5"></i>
+                            </div>
+                            {% elif 'alert' in notification.message|lower or 'cancel' in notification.message|lower %}
+                            <div
+                                class="avatar rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center">
+                                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                            </div>
+                            {% else %}
+                            <div
+                                class="avatar rounded-circle bg-secondary-subtle text-secondary d-flex align-items-center justify-content-center">
+                                <i class="bi bi-bell-fill fs-5"></i>
+                            </div>
+                            {% endif %}
+
+                            <!-- Unread Indicator Dot (Optional logic) -->
+                            <!-- <span class="position-absolute top-0 start-100 translate-middle p-1 bg-primary border border-light rounded-circle"></span> -->
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="fw-semibold text-heading text-truncate mb-0 pe-3" style="font-size: 1rem;">
+                                    {{ notification.title }}
+                                </h6>
+                                <span class="text-xs text-muted fw-medium text-nowrap">
+                                    {{ notification.created_at.strftime('%b %d') }}
+                                </span>
+                            </div>
+
+                            <p class="text-sm text-muted mb-3 lh-relaxed text-break">
+                                {{ notification.message }}
+                            </p>
+
+                            {% if notification.link %}
+                            {% if 'certificate' in notification.link or 'download' in notification.link %}
+                            <a href="{{ notification.link }}"
+                                class="btn btn-sm btn-soft-success rounded-pill px-3 fw-medium">
+                                <i class="bi bi-download me-1"></i>Download Certificate
+                            </a>
+                            {% elif 'order_detail' in notification.link or 'order' in notification.link %}
+                            <a href="{{ notification.link }}"
+                                class="btn btn-sm btn-soft-primary rounded-pill px-3 fw-medium">
+                                <i class="bi bi-bag me-1"></i>View Order
+                            </a>
+                            {% else %}
+                            <a href="{{ notification.link }}"
+                                class="btn btn-sm btn-soft-primary rounded-pill px-3 fw-medium">
+                                <i class="bi bi-chat-dots me-1"></i>Chat
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Hover Delete Action -->
+                        <div
+                            class="position-absolute top-0 end-0 h-100 d-flex flex-column justify-content-center px-3 opacity-0 group-hover-opacity transition-all bg-gradient-mask">
+                            <button onclick="deleteNotification(event, {{ notification.id }})"
+                                class="btn btn-icon btn-sm btn-white border shadow-sm text-danger rounded-circle"
+                                title="Dismiss">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Elegant Empty State -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <div
+                        class="avatar avatar-xl rounded-circle bg-surface-secondary text-muted d-inline-flex align-items-center justify-content-center">
+                        <i class="bi bi-inbox fs-1"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold text-heading mb-2">All caught up</h4>
+                <p class="text-muted text-sm mb-4">No new notifications at the moment.</p>
+                <a href="{{ url_for('service.browse') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    Browse Services
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional Design System Overrides */
+
+    :root {
+        --surface-secondary: #f8f9fa;
+        --surface-card: #ffffff;
+    }
+
+    [data-bs-theme="dark"] {
+        --surface-secondary: #0f172a;
+        --surface-card: #1e293b;
+    }
+
+    .bg-surface-secondary {
+        background-color: var(--surface-secondary);
+    }
+
+    .card {
+        background-color: var(--surface-card);
+    }
+
+    .text-heading {
+        color: var(--bs-body-color);
+    }
+
+    .text-xs {
+        font-size: 0.75rem;
+    }
+
+    .text-sm {
+        font-size: 0.875rem;
+    }
+
+    .ls-tight {
+        letter-spacing: -0.015em;
+    }
+
+    /* Avatars */
+    .avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .avatar-xl {
+        width: 96px;
+        height: 96px;
+    }
+
+    /* Button Styles (Soft/Neutral) */
+    .btn-neutral {
+        background: var(--surface-card);
+        color: var(--bs-body-color);
+    }
+
+    .btn-neutral:hover {
+        background: var(--bs-secondary-bg);
+    }
+
+    .btn-soft-primary {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border: none;
+    }
+
+    .btn-soft-primary:hover {
+        background-color: rgba(13, 110, 253, 0.2);
+        color: #0d6efd;
+    }
+
+    .btn-soft-success {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: none;
+    }
+
+    .btn-soft-success:hover {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: #198754;
+    }
+
+    /* List Item Interactions */
+    .notification-item {
+        background-color: transparent;
+        /* Inherit card bg */
+        border-color: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    [data-bs-theme="dark"] .notification-item {
+        border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .notification-item:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    [data-bs-theme="dark"] .notification-item:hover {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Hover Actions */
+    .group-hover-opacity {
+        opacity: 0;
+    }
+
+    .notification-item:hover .group-hover-opacity {
+        opacity: 1;
+    }
+
+    /* Gradient Mask for Delete Button (adds fade to text) */
+    .bg-gradient-mask {
+        background: linear-gradient(to right, transparent, var(--surface-card) 20%);
+    }
+
+    /* Animations */
+    .fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ANIMATION_DURATION = 300;
+
+    function deleteNotification(event, id) {
+        event.stopPropagation();
+
+        // Optimistic UI update: Remove immediately visually
+        const el = document.getElementById(`notification-${id}`);
+        animateRemoval(el);
+
+        // Send request in background
+        fetch(`/user/notifications/delete/${id}`, { method: 'POST' })
+            .catch(err => {
+                // If fails, we might want to show an error or reload (omitted for cleaner UX)
+                console.error('Delete failed', err);
+            });
+    }
+
+    function animateRemoval(element) {
+        element.style.height = element.offsetHeight + 'px';
+        element.style.overflow = 'hidden';
+        element.style.transition = `all ${ANIMATION_DURATION}ms ease`;
+
+        requestAnimationFrame(() => {
+            element.style.opacity = '0';
+            element.style.height = '0';
+            element.style.padding = '0';
+            element.style.border = 'none';
+            element.style.marginBottom = '0';
+        });
+
+        setTimeout(() => {
+            element.remove();
+            checkEmptyState();
+        }, ANIMATION_DURATION);
+    }
+
+    function clearAllNotifications() {
+        if (!confirm('Clear all notifications?')) return;
+
+        const btn = event.currentTarget;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        const allItems = document.querySelectorAll('.notification-item');
+        allItems.forEach((el, index) => {
+            setTimeout(() => animateRemoval(el), index * 50); // Stagger removal
+        });
+
+        fetch('/user/notifications/clear-all', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                setTimeout(() => location.reload(), allItems.length * 50 + 300);
+            });
+    }
+
+    function checkEmptyState() {
+        if (document.querySelectorAll('.notification-item').length === 0) {
+            location.reload();
+        }
+    }
+</script>
+{% endblock %}

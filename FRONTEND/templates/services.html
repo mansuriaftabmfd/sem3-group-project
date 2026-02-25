@@ -1,0 +1,929 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Services - SkillVerse{% endblock %}
+
+{% block content %}
+<section class="services-section">
+    <div class="container-fluid px-4">
+        <!-- Hero Header -->
+        <div class="hero-header text-center mb-5">
+            <h1 class="hero-title">
+                <span class="gradient-text">Discover Amazing Services</span>
+            </h1>
+            <p class="hero-subtitle">Connect with talented professionals worldwide</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3">
+                <div class="filters-card sticky-sidebar">
+
+                    <!-- Search Input -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="searchInput">
+                            <i class="bi bi-search me-2"></i>Search
+                        </label>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Search services..."
+                                autocomplete="off" value="{{ request.args.get('q', '') }}">
+                        </div>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-grid me-2"></i>Category
+                        </label>
+                        <div class="category-list">
+                            <label class="category-item">
+                                <input type="radio" name="category" value="" {% if not request.args.get('category')
+                                    %}checked{% endif %} class="category-filter">
+                                <span class="category-content">
+                                    <i class="bi bi-grid-fill category-icon"></i>
+                                    <span>All Categories</span>
+                                </span>
+                            </label>
+                            {% for category in categories %}
+                            <label class="category-item">
+                                <input type="radio" name="category" value="{{ category.id }}" {% if
+                                    request.args.get('category')==category.id|string %}checked{% endif %}
+                                    class="category-filter">
+                                <span class="category-content">
+                                    <i class="bi bi-{{ category.icon or 'tag' }} category-icon"></i>
+                                    <span>{{ category.name }}</span>
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-currency-rupee me-2"></i>Price Range
+                        </label>
+                        <div class="price-inputs">
+                            <input type="number" id="minPriceInput" class="price-input" placeholder="Min" min="0"
+                                value="{{ request.args.get('min_price', '') }}">
+                            <span class="price-separator">-</span>
+                            <input type="number" id="maxPriceInput" class="price-input" placeholder="Max" min="0"
+                                value="{{ request.args.get('max_price', '') }}">
+                        </div>
+                    </div>
+
+                    <!-- Rating Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="ratingFilter">
+                            <i class="bi bi-star me-2"></i>Rating
+                        </label>
+                        <select id="ratingFilter" class="custom-select">
+                            <option value="">Any Rating</option>
+                            <option value="4">⭐ 4.0 &amp; up</option>
+                            <option value="3">⭐ 3.0 &amp; up</option>
+                            <option value="2">⭐ 2.0 &amp; up</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="sortFilter">
+                            <i class="bi bi-sort-down me-2"></i>Sort By
+                        </label>
+                        <select id="sortFilter" class="custom-select">
+                            <option value="newest">Newest First</option>
+                            <option value="highest_rated">Highest Rated</option>
+                            <option value="price_low">Price: Low to High</option>
+                            <option value="price_high">Price: High to Low</option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="clearFiltersBtn" class="btn-clear-filters">
+                        <i class="bi bi-x-circle me-2"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Service Grid -->
+            <div class="col-lg-9">
+                <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="servicesGrid" class="services-grid">
+                    {% if services %}
+                    {% for service in services %}
+                    <a href="{{ url_for('service.detail', service_id=service.id) }}" class="service-card-link">
+                        <div class="service-card">
+                            <div class="service-image-container">
+                                <img src="{{ service.get_image_url() }}" class="service-image" alt="{{ service.title }}"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500';">
+                                <span class="service-badge">{{ service.category.name }}</span>
+                                <button type="button" class="favorite-button" data-service-id="{{ service.id }}">
+                                    <i
+                                        class="bi bi-heart{% if current_user.is_authenticated and service.is_favorited_by(current_user) %}-fill{% endif %}"></i>
+                                </button>
+                            </div>
+                            <div class="service-details">
+                                <div class="service-header">
+                                    <div class="service-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <span class="rating-value">{{ service.get_average_rating() }}</span>
+                                        <span class="rating-count">({{ service.get_review_count() }})</span>
+                                    </div>
+                                    <div class="service-price">₹{{ "%.0f"|format(service.price) }}</div>
+                                </div>
+                                <h3 class="service-title">{{ service.title }}</h3>
+                                <p class="service-description">{{ service.description }}</p>
+                                <div class="service-footer">
+                                    <div class="provider-info">
+                                        <img src="{{ service.provider.get_avatar_url() }}" class="provider-avatar"
+                                            alt="{{ service.provider.username }}"
+                                            onerror="this.onerror=null; this.src='https://via.placeholder.com/32';">
+                                        <span class="provider-name">{{ service.provider.username }}</span>
+                                    </div>
+                                    <div class="delivery-time">
+                                        <i class="bi bi-clock"></i>
+                                        <span>{{ service.delivery_time }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div id="noResults" class="no-results" {% if services %}style="display: none;" {% endif %}>
+                    <div class="no-results-icon"><i class="bi bi-inbox"></i></div>
+                    <h3>No Services Found</h3>
+                    <p>Try adjusting your search or filters</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* ========================================
+       Services Page Styles
+       ======================================== */
+
+    /* Main Section */
+    .services-section {
+        min-height: 100vh;
+        padding: 80px 0 60px;
+        background: var(--background-color);
+    }
+
+    /* Hero Header */
+    .hero-header {
+        margin-bottom: 3rem;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        color: var(--muted-color);
+    }
+
+    /* Filters Sidebar */
+    .sticky-sidebar {
+        position: sticky;
+        top: 100px;
+    }
+
+    .filters-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-bs-theme="dark"] .filters-card {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-label {
+        display: flex;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted-color);
+        margin-bottom: 0.75rem;
+    }
+
+    /* Search Input */
+    .search-input-wrapper {
+        width: 100%;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--card-bg);
+        font-size: 0.95rem;
+        color: var(--foreground-color);
+        transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    /* Categories */
+    .category-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .category-item {
+        cursor: pointer;
+        display: block;
+    }
+
+    .category-item input {
+        display: none;
+    }
+
+    .category-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        color: var(--foreground-color);
+        transition: background-color 0.2s;
+    }
+
+    .category-icon {
+        font-size: 1rem;
+    }
+
+    .category-item:hover .category-content {
+        background: rgba(139, 92, 246, 0.05);
+    }
+
+    .category-item input:checked+.category-content {
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Price Inputs */
+    .price-inputs {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .price-input {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--card-bg);
+        font-size: 0.9rem;
+        color: var(--foreground-color);
+        box-sizing: border-box;
+    }
+
+    .price-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .price-separator {
+        color: var(--muted-color);
+        font-weight: 500;
+    }
+
+    /* Selects */
+    .custom-select {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--card-bg);
+        font-size: 0.9rem;
+        color: var(--foreground-color);
+        cursor: pointer;
+    }
+
+    .custom-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    /* Clear Button */
+    .btn-clear-filters {
+        width: 100%;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        transition: transform 0.2s;
+    }
+
+    .btn-clear-filters:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Service Grid */
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Service Card Link */
+    .service-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+
+    .service-card-link:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Service Card */
+    .service-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        will-change: transform;
+    }
+
+    [data-bs-theme="dark"] .service-card {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .service-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15);
+    }
+
+    /* Service Image */
+    .service-image-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .service-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .service-card:hover .service-image {
+        transform: scale(1.05);
+    }
+
+    .service-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        padding: 0.4rem 0.9rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .favorite-button {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+    .favorite-button:hover {
+        transform: scale(1.1);
+    }
+
+    .favorite-button i {
+        color: #ef4444;
+        font-size: 1rem;
+    }
+
+    /* Service Details */
+    .service-details {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .service-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .service-rating {
+        font-size: 0.85rem;
+        color: var(--foreground-color);
+    }
+
+    .service-rating i {
+        color: #fbbf24;
+        margin-right: 4px;
+    }
+
+    .service-price {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--primary-color);
+    }
+
+    .service-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--foreground-color);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .service-description {
+        font-size: 0.85rem;
+        color: var(--muted-color);
+        margin-bottom: 1rem;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Service Footer */
+    .service-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: auto;
+    }
+
+    .provider-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .provider-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid var(--primary-color);
+        object-fit: cover;
+    }
+
+    .provider-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--foreground-color);
+    }
+
+    .delivery-time {
+        font-size: 0.8rem;
+        color: var(--muted-color);
+    }
+
+    .delivery-time i {
+        margin-right: 4px;
+    }
+
+    /* No Results */
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .no-results-icon {
+        font-size: 4rem;
+        color: var(--muted-color);
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .no-results h3 {
+        color: var(--foreground-color);
+    }
+
+    .no-results p {
+        color: var(--muted-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filters-card {
+            position: static;
+        }
+    }
+</style>
+
+<script>
+    /**
+     * Services Page JavaScript
+     * Handles filtering, searching, and dynamic updates
+     */
+    (function () {
+        "use strict";
+
+        /* ========================================
+           State Management
+           ======================================== */
+        var SearchState = {
+            filters: {
+                search: "",
+                min_price: null,
+                max_price: null,
+                min_rating: null,
+                category: "",
+                sort: "newest"
+            },
+            debounceTimer: null
+        };
+
+        /* ========================================
+           API Functions
+           ======================================== */
+
+        /**
+         * Fetch services from API with current filters
+         * @param {boolean} shouldUpdateUrl - Whether to update browser URL
+         */
+        async function fetchServices(shouldUpdateUrl) {
+            if (shouldUpdateUrl === undefined) {
+                shouldUpdateUrl = true;
+            }
+
+            var spinner = document.getElementById("loadingSpinner");
+            var grid = document.getElementById("servicesGrid");
+            var noResultsEl = document.getElementById("noResults");
+
+            if (spinner) {
+                spinner.style.display = "block";
+            }
+            if (grid) {
+                grid.style.opacity = "0.5";
+            }
+
+            try {
+                var params = new URLSearchParams();
+                var filters = SearchState.filters;
+                var keys = Object.keys(filters);
+
+                for (var i = 0; i < keys.length; i++) {
+                    var key = keys[i];
+                    var value = filters[key];
+                    if (value !== null && value !== "") {
+                        params.append(key, value);
+                    }
+                }
+
+                // Update URL if requested
+                if (shouldUpdateUrl) {
+                    var newUrl = window.location.pathname + "?" + params.toString();
+                    window.history.pushState({ path: newUrl }, "", newUrl);
+                }
+
+                var response = await fetch("/api/services/search?" + params.toString());
+                var data = await response.json();
+
+                if (data.success) {
+                    displayServices(data.services);
+                } else {
+                    console.error("API Error:", data.error);
+                    if (grid) {
+                        grid.innerHTML = '<div class="col-12 text-center text-danger">Error loading services</div>';
+                    }
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+            } finally {
+                if (spinner) {
+                    spinner.style.display = "none";
+                }
+                if (grid) {
+                    grid.style.opacity = "1";
+                }
+            }
+        }
+
+        /* ========================================
+           Render Functions
+           ======================================== */
+
+        /**
+         * Display services in the grid
+         * @param {Array} services - Array of service objects from API
+         */
+        function displayServices(services) {
+            var grid = document.getElementById("servicesGrid");
+            var noResultsEl = document.getElementById("noResults");
+
+            if (!grid || !noResultsEl) {
+                return;
+            }
+
+            if (!services || services.length === 0) {
+                grid.innerHTML = "";
+                grid.style.display = "none";
+                noResultsEl.style.display = "block";
+                return;
+            }
+
+            noResultsEl.style.display = "none";
+            grid.style.display = "grid";
+
+            var html = "";
+            for (var i = 0; i < services.length; i++) {
+                var service = services[i];
+                var s = {
+                    id: service.id,
+                    title: service.title || "Service",
+                    img: service.image_url || "https://via.placeholder.com/500x300",
+                    cat: service.category || "General",
+                    price: Math.round(service.price || 0),
+                    rating: (service.rating || 0).toFixed(1),
+                    reviews: service.review_count || 0,
+                    provName: service.provider_name || "Provider",
+                    provAv: service.provider_avatar || "https://via.placeholder.com/32",
+                    del: service.delivery_time || "-",
+                    desc: service.description || "",
+                    url: service.url || "#"
+                };
+
+                html += '<a href="' + s.url + '" class="service-card-link">';
+                html += '<div class="service-card">';
+                html += '<div class="service-image-container">';
+                html += '<img src="' + s.img + '" class="service-image" alt="' + escapeHtml(s.title) + '" onerror="this.onerror=null; this.src=\'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500\';">';
+                html += '<span class="service-badge">' + escapeHtml(s.cat) + '</span>';
+                html += '<button type="button" class="favorite-button" data-service-id="' + s.id + '">';
+                html += '<i class="bi bi-heart"></i>';
+                html += '</button>';
+                html += '</div>';
+                html += '<div class="service-details">';
+                html += '<div class="service-header">';
+                html += '<div class="service-rating">';
+                html += '<i class="bi bi-star-fill"></i>';
+                html += '<span class="rating-value">' + s.rating + '</span>';
+                html += '<span class="rating-count">(' + s.reviews + ')</span>';
+                html += '</div>';
+                html += '<div class="service-price">₹' + s.price + '</div>';
+                html += '</div>';
+                html += '<h3 class="service-title">' + escapeHtml(s.title) + '</h3>';
+                html += '<p class="service-description">' + escapeHtml(s.desc) + '</p>';
+                html += '<div class="service-footer">';
+                html += '<div class="provider-info">';
+                html += '<img src="' + s.provAv + '" class="provider-avatar" alt="' + escapeHtml(s.provName) + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/32\';">';
+                html += '<span class="provider-name">' + escapeHtml(s.provName) + '</span>';
+                html += '</div>';
+                html += '<div class="delivery-time"><i class="bi bi-clock"></i><span>' + escapeHtml(s.del) + '</span></div>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+                html += '</a>';
+            }
+
+            grid.innerHTML = html;
+
+            // Attach favorite button event listeners
+            attachFavoriteListeners();
+        }
+
+        /**
+         * Escape HTML special characters to prevent XSS
+         * @param {string} text - Text to escape
+         * @returns {string} - Escaped text
+         */
+        function escapeHtml(text) {
+            if (!text) return "";
+            var div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Attach event listeners to favorite buttons
+         */
+        function attachFavoriteListeners() {
+            var buttons = document.querySelectorAll(".favorite-button[data-service-id]");
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener("click", handleFavoriteClick);
+            }
+        }
+
+        /**
+         * Handle favorite button click
+         * @param {Event} e - Click event
+         */
+        function handleFavoriteClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var btn = e.currentTarget;
+            var serviceId = btn.getAttribute("data-service-id");
+            var icon = btn.querySelector("i");
+
+            fetch("/service/" + serviceId + "/favorite", { method: "POST" })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.status === "added") {
+                        icon.className = "bi bi-heart-fill";
+                    } else {
+                        icon.className = "bi bi-heart";
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Favorite Error:", error);
+                });
+        }
+
+        /* ========================================
+           Initialization
+           ======================================== */
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize state from URL parameters
+            var urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get("q")) {
+                SearchState.filters.search = urlParams.get("q");
+            }
+            if (urlParams.get("category")) {
+                SearchState.filters.category = urlParams.get("category");
+            }
+            if (urlParams.get("min_price")) {
+                SearchState.filters.min_price = urlParams.get("min_price");
+            }
+            if (urlParams.get("max_price")) {
+                SearchState.filters.max_price = urlParams.get("max_price");
+            }
+            if (urlParams.get("min_rating")) {
+                SearchState.filters.min_rating = urlParams.get("min_rating");
+            }
+            if (urlParams.get("sort")) {
+                SearchState.filters.sort = urlParams.get("sort");
+            }
+
+            // Search Input Listener
+            var searchInput = document.getElementById("searchInput");
+            if (searchInput) {
+                searchInput.addEventListener("input", function (e) {
+                    var cleanVal = e.target.value.trim();
+                    clearTimeout(SearchState.debounceTimer);
+
+                    if (!cleanVal) {
+                        if (SearchState.filters.search !== "") {
+                            SearchState.filters.search = "";
+                            fetchServices(true);
+                        }
+                        return;
+                    }
+
+                    SearchState.debounceTimer = setTimeout(function () {
+                        SearchState.filters.search = cleanVal;
+                        fetchServices(true);
+                    }, 300);
+                });
+            }
+
+            // Category Filter Listeners
+            var categoryFilters = document.querySelectorAll(".category-filter");
+            for (var i = 0; i < categoryFilters.length; i++) {
+                categoryFilters[i].addEventListener("change", function (e) {
+                    SearchState.filters.category = e.target.value;
+                    fetchServices(true);
+                });
+            }
+
+            // Price Input Listeners (with debounce)
+            var priceInputIds = ["minPriceInput", "maxPriceInput"];
+            for (var j = 0; j < priceInputIds.length; j++) {
+                (function (inputId) {
+                    var el = document.getElementById(inputId);
+                    if (el) {
+                        el.addEventListener("input", function (e) {
+                            clearTimeout(SearchState.debounceTimer);
+                            SearchState.debounceTimer = setTimeout(function () {
+                                if (inputId === "minPriceInput") {
+                                    SearchState.filters.min_price = e.target.value;
+                                } else {
+                                    SearchState.filters.max_price = e.target.value;
+                                }
+                                fetchServices(true);
+                            }, 500);
+                        });
+                    }
+                })(priceInputIds[j]);
+            }
+
+            // Rating Filter Listener
+            var ratingFilter = document.getElementById("ratingFilter");
+            if (ratingFilter) {
+                ratingFilter.addEventListener("change", function (e) {
+                    SearchState.filters.min_rating = e.target.value;
+                    fetchServices(true);
+                });
+            }
+
+            // Sort Filter Listener
+            var sortFilter = document.getElementById("sortFilter");
+            if (sortFilter) {
+                sortFilter.addEventListener("change", function (e) {
+                    SearchState.filters.sort = e.target.value;
+                    fetchServices(true);
+                });
+            }
+
+            // Clear Filters Button
+            var clearBtn = document.getElementById("clearFiltersBtn");
+            if (clearBtn) {
+                clearBtn.addEventListener("click", function () {
+                    window.location.href = window.location.pathname;
+                });
+            }
+
+            // Handle browser back/forward navigation
+            window.onpopstate = function () {
+                window.location.reload();
+            };
+
+            // Attach favorite listeners to server-rendered cards
+            attachFavoriteListeners();
+        });
+    })();
+</script>
+{% endblock %}

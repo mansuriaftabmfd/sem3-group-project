@@ -1,0 +1,362 @@
+<header class="fixed-top transition-all" id="mainHelper">
+    <style>
+        /* Mobile Menu Fixes */
+        @media (max-width: 991.98px) {
+
+            /* FIX: Ensure offcanvas has a solid background and correct z-index */
+            .offcanvas {
+                background-color: var(--card-bg) !important;
+                /* Force solid background using theme variable */
+                z-index: 9999 !important;
+                /* Ensure it's above everything */
+                height: 100vh !important;
+                visibility: visible;
+                /* Ensure it's reachable */
+            }
+
+            .offcanvas-body {
+                background-color: var(--card-bg) !important;
+                /* Double ensure body is opaque */
+            }
+
+            /* Make dropdowns static (expandable) instead of floating absolute */
+            .offcanvas .dropdown-menu {
+                position: static !important;
+                float: none;
+                width: 100% !important;
+                margin-top: 0;
+                background-color: transparent;
+                border: 0;
+                box-shadow: none !important;
+                padding-left: 1rem;
+                padding-right: 0;
+                transform: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .offcanvas .dropdown-menu.show {
+                display: block;
+            }
+
+            /* Stack items in the user menu area */
+            .offcanvas .d-flex.align-items-center.gap-3.mt-3 {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 1rem !important;
+                width: 100%;
+            }
+
+            /* Adjust dropdown toggles to take full width */
+            .offcanvas .dropdown,
+            .offcanvas .dropdown-toggle {
+                width: 100%;
+            }
+
+            .offcanvas .dropdown-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                text-align: left;
+            }
+
+            /* Ensure notification dropdown also behaves nicely */
+            .offcanvas .dropdown-menu[style*="max-height"] {
+                max-height: none !important;
+            }
+
+            /* Make buttons full width */
+            .offcanvas .btn:not(.btn-close):not(.theme-toggle) {
+                width: 100%;
+                text-align: left;
+            }
+
+            /* Ensure user avatar wrapper doesn't break layout */
+            .offcanvas .avatar-wrapper {
+                margin-right: auto;
+            }
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg py-3">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-body" href="{{ url_for('main.index') }}"
+                style="cursor: pointer;">
+                <div class="logo-box d-flex align-items-center justify-content-center text-white rounded-3 shadow-sm">
+                    S
+                </div>
+                <span><span class="text-primary">Skill</span>Verse</span>
+            </a>
+
+            <!-- Mobile Toggles -->
+            <div class="d-flex align-items-center gap-2 d-lg-none">
+                <button class="btn btn-link text-body p-2 theme-toggle" aria-label="Toggle theme">
+                    <i class="bi bi-moon-stars-fill" id="themeIconMobile"></i>
+                </button>
+                <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+            </div>
+
+            <!-- Desktop Sidebar (Offcanvas for Mobile) -->
+            <div class="sidebar offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header border-bottom">
+                    <h5 class="offcanvas-title fw-bold" id="offcanvasNavbarLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium">
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('main.index') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('service.browse') }}">Browse Skills</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('main.about') }}">About Us</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('main.index') }}#how-it-works">How It Works</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('main.index') }}#features">Features</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 d-flex align-items-center gap-1"
+                                href="{{ url_for('main.verify_certificate_page') }}">
+                                <i class="bi bi-patch-check-fill text-warning" style="font-size:0.85rem;"></i>
+                                Verify
+                            </a>
+                        </li>
+                        {% if current_user.is_authenticated %}
+
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('user.chats') }}">Chats</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                        <!-- Custom Theme Toggle Switch (Desktop) -->
+                        <label class="switch d-none d-lg-inline-block theme-toggle-switch">
+                            <span class="sun"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <g fill="#ffd43b">
+                                        <circle r="5" cy="12" cx="12"></circle>
+                                        <path
+                                            d="m21 13h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm-17 0h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm13.66-5.66a1 1 0 0 1 -.66-.29 1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 0 1 -.75.29zm-12.02 12.02a1 1 0 0 1 -.71-.29 1 1 0 0 1 0-1.41l.71-.66a1 1 0 0 1 1.41 1.41l-.71.71a1 1 0 0 1 -.7.24zm6.36-14.36a1 1 0 0 1 -1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1 -1 1zm0 17a1 1 0 0 1 -1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1 -1 1zm-5.66-14.66a1 1 0 0 1 -.7-.29l-.71-.71a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1 0 1.41 1 1 0 0 1 -.71.29zm12.02 12.02a1 1 0 0 1 -.7-.29l-.66-.71a1 1 0 0 1 1.36-1.36l.71.71a1 1 0 0 1 0 1.41 1 1 0 0 1 -.71.24z">
+                                        </path>
+                                    </g>
+                                </svg></span>
+                            <span class="moon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                                    <path
+                                        d="m223.5 32c-123.5 0-223.5 100.3-223.5 224s100 224 223.5 224c60.6 0 115.5-24.2 155.8-63.4 5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6-96.9 0-175.5-78.8-175.5-176 0-65.8 36-123.1 89.3-153.3 6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z">
+                                    </path>
+                                </svg></span>
+                            <input type="checkbox" class="input theme-switch-input">
+                            <span class="slider"></span>
+                        </label>
+
+                        {% if current_user.is_authenticated %}
+                        <!-- Notifications - Using simple link for now or dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-ghost position-relative" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell fs-5"></i>
+                                {% set unread_count = current_user.get_unread_notifications_count() %}
+                                {% if unread_count > 0 %}
+                                <span
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                    style="font-size: 0.5rem;">
+                                    {{ unread_count }}
+                                </span>
+                                {% endif %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0"
+                                style="width: 300px; max-height: 400px; overflow-y: auto;">
+                                <li>
+                                    <h6 class="dropdown-header">Notifications</h6>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <!-- Reuse logic from old header but minimal -->
+                                {% for notification in current_user.get_recent_notifications(5) %}
+                                <li><a class="dropdown-item small text-wrap" href="{{ notification.link or '#' }}">{{
+                                        notification.message }}</a></li>
+                                {% else %}
+                                <li><span class="dropdown-item disabled small">No new notifications</span></li>
+                                {% endfor %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-center small text-primary"
+                                        href="{{ url_for('user.notifications') }}">View All</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- User Menu -->
+                        <div class="dropdown">
+                            <button class="btn btn-ghost d-flex align-items-center gap-2" type="button"
+                                data-bs-toggle="dropdown">
+                                <div class="avatar-wrapper" style="width: 32px; height: 32px;">
+                                    <img src="{{ current_user.get_avatar_url() }}"
+                                        class="rounded-circle w-100 h-100 object-fit-cover" alt="User">
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                <li><a class="dropdown-item" href="{{ url_for('user.dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-2"></i>Main Dashboard</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{{ url_for('user.profile', username=current_user.username) }}">
+                                        <i class="bi bi-person me-2"></i>Profile</a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Buy/Sell Options for All Users (except admin) -->
+                                {% if current_user.user_type != 'admin' %}
+                                <li class="dropdown-header text-muted small">Dashboards</li>
+                                <li><a class="dropdown-item" href="{{ url_for('user.buyer_dashboard') }}">
+                                        <i class="bi bi-cart me-2 text-primary"></i>My Buyer Dashboard</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('user.seller_dashboard') }}">
+                                        <i class="bi bi-shop me-2 text-success"></i>My Seller Dashboard</a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li class="dropdown-header text-muted small">As Buyer</li>
+                                <li><a class="dropdown-item" href="{{ url_for('service.browse') }}">
+                                        <i class="bi bi-search me-2 text-primary"></i>Browse Services</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('user.orders') }}">
+                                        <i class="bi bi-bag me-2 text-success"></i>My Orders</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('user.my_certificates') }}">
+                                        <i class="bi bi-award me-2 text-warning"></i>My Certificates</a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li class="dropdown-header text-muted small">As Seller</li>
+                                <li><a class="dropdown-item" href="{{ url_for('service.create') }}">
+                                        <i class="bi bi-plus-circle me-2 text-primary"></i>Sell a Service</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('user.issued_certificates') }}">
+                                        <i class="bi bi-patch-check me-2 text-success"></i>Issued Certificates</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('availability.manage') }}">
+                                        <i class="bi bi-calendar-check me-2 text-warning"></i>Manage Availability</a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                
+                                <!-- Common Options -->
+                                <li><a class="dropdown-item" href="{{ url_for('user.wallet') }}">
+                                        <i class="bi bi-wallet2 me-2 text-primary"></i>My Wallet</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('user.transactions') }}">
+                                        <i class="bi bi-clock-history me-2 text-info"></i>Transactions</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Sign Out</a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-ghost fw-medium btn-sm-custom">Login</a>
+                        <a href="{{ url_for('auth.register') }}"
+                            class="btn btn-primary fw-semibold shadow-sm btn-sm-custom">Sign Up</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+<script>
+    function markAsRead(notificationId) {
+        fetch(`/user/notifications/mark-read/${notificationId}`, { method: 'POST' });
+    }
+
+    function markAllRead() {
+        fetch('/user/notifications/mark-all-read', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateNotificationUI();
+                }
+            });
+    }
+
+    function clearAllNotifications() {
+        if (confirm('Clear all notifications?')) {
+            fetch('/user/notifications/clear-all', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        updateNotificationUI();
+                    }
+                });
+        }
+    }
+
+    function deleteNotification(event, notificationId) {
+        event.stopPropagation();
+        fetch(`/user/notifications/delete/${notificationId}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    event.target.closest('li').remove(); // Adjusted selector
+                    updateNotificationBadge();
+                }
+            });
+    }
+
+    function updateNotificationUI() {
+        fetch('/api/notifications')
+            .then(res => res.json())
+            .then(data => {
+                updateNotificationBadge(data.unread_count);
+                // We'd need to rebuild the list here, but for now we rely on page refresh 
+                // or just updating badge. To fully rebuild the list we need to replicate the 
+                // HTML structure string generation here.
+            })
+            .catch(err => console.log('Notification fetch error:', err));
+    }
+
+    function updateNotificationBadge(count) {
+        // Selector needs to match new structure
+        const bellBtn = document.querySelector('.dropdown button i.bi-bell');
+        if (!bellBtn) return;
+
+        const btn = bellBtn.parentElement;
+        let badge = btn.querySelector('.badge');
+
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+                badge.style.fontSize = '0.5rem';
+                badge.innerText = count;
+                btn.appendChild(badge);
+            } else {
+                badge.innerText = count;
+            }
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    const isAuthenticated = "{{ 'true' if current_user.is_authenticated else 'false' }}" === "true";
+
+    if (isAuthenticated) {
+        document.addEventListener('DOMContentLoaded', function () {
+            updateNotificationUI();
+            setInterval(updateNotificationUI, 10000);
+        });
+    }
+</script>

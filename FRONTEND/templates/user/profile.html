@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} - Profile - SkillVerse{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 bg-light" style="margin-top: 60px;">
+    <!-- Profile Header -->
+    <div class="bg-white border-bottom shadow-sm">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
+                    <div class="position-relative d-inline-block">
+                        <img src="{{ user.get_avatar_url() }}"
+                            class="rounded-circle shadow-lg border border-4 border-white"
+                            style="width: 140px; height: 140px; object-fit: cover;" alt="{{ user.username }}">
+                        <span
+                            class="position-absolute bottom-0 end-0 p-3 bg-success border border-4 border-white rounded-circle"
+                            title="Online"></span>
+                    </div>
+                </div>
+                <div class="col-md text-center text-md-start">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h2 class="fw-bold mb-1">{{ user.full_name or user.username }}</h2>
+                            <p class="text-muted mb-3 text-capitalize fs-5"><i class="bi bi-briefcase me-2"></i>{{
+                                user.user_type }}</p>
+
+                            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-4 mb-3">
+                                <div><i class="bi bi-geo-alt-fill text-danger me-2"></i>{{ user.city or 'Location' }},
+                                    {{ user.country or 'Global' }}</div>
+                                <div><i class="bi bi-calendar-check text-primary me-2"></i>Member since {{
+                                    user.created_at.strftime('%b %Y') }}</div>
+                                <div><i class="bi bi-translate text-success me-2"></i>English, Hindi</div>
+                            </div>
+
+                            <p class="text-secondary max-w-2xl">{{ user.bio or 'No bio provided yet.' }}</p>
+                        </div>
+                        <div class="col-lg-4 text-center text-lg-end">
+                            <div class="card border-0 bg-light rounded-4 p-3 d-inline-block text-start">
+                                <div class="d-flex gap-4">
+                                    <div class="text-center px-2">
+                                        <div class="fw-bold fs-4">{{ user.get_average_rating() }}</div>
+                                        <div class="small text-muted">Rating</div>
+                                    </div>
+                                    <div class="border-end"></div>
+                                    <div class="text-center px-2">
+                                        <div class="fw-bold fs-4">{{ stats.total_reviews or 0 }}</div>
+                                        <div class="small text-muted">Reviews</div>
+                                    </div>
+                                    <div class="border-end"></div>
+                                    <div class="text-center px-2">
+                                        <div class="fw-bold fs-4">{{ stats.completed_projects or 0 }}</div>
+                                        <div class="small text-muted">Projects</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if current_user.is_authenticated and current_user.id == user.id %}
+                            <div class="mt-4">
+                                <a href="{{ url_for('user.settings') }}"
+                                    class="btn btn-outline-primary rounded-pill px-4">
+                                    <i class="bi bi-pencil me-2"></i>Edit Profile
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="container">
+            <ul class="nav nav-tabs border-0" id="profileTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold py-3 border-0 border-bottom border-3 border-primary text-primary"
+                        id="portfolio-tab" data-bs-toggle="tab" href="#portfolio" role="tab">Portfolio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-bold py-3 border-0 text-muted hover-primary" id="services-tab"
+                        data-bs-toggle="tab" href="#services" role="tab">Gigs / Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-bold py-3 border-0 text-muted hover-primary" id="reviews-tab"
+                        data-bs-toggle="tab" href="#reviews" role="tab">Reviews</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="container py-5">
+        <div class="tab-content" id="profileTabsContent">
+
+            <!-- Portfolio Tab -->
+            <div class="tab-pane fade show active" id="portfolio" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold">Portfolio Showcase</h4>
+                    {% if current_user.is_authenticated and current_user.id == user.id %}
+                    <a href="{{ url_for('user.settings') }}" class="btn btn-primary rounded-pill btn-sm btn-sweep">
+                        <i class="bi bi-plus-lg me-1"></i> Add Project
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if user.portfolio.count() > 0 %}
+                <div class="row g-4">
+                    {% for project in user.portfolio.all() %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-slide-card group">
+                            <div class="position-relative overflow-hidden">
+                                <img src="{% if project.image_url %}{{ url_for('static', filename='portfolio/' + project.image_url) }}{% endif %}"
+                                    class="card-img-top object-fit-cover transition-transform duration-500 group-hover-scale"
+                                    style="height: 240px;" alt="{{ project.title }}"
+                                    onerror="this.style.display='none';">
+                                {% if project.link %}
+                                <div
+                                    class="position-absolute top-0 end-0 m-3 opacity-0 group-hover-opacity transition-opacity duration-300">
+                                    <a href="{{ project.link }}" target="_blank"
+                                        class="btn btn-light rounded-circle shadow-sm" title="View Project">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-2">{{ project.title }}</h5>
+                                <p class="text-muted small line-clamp-2 mb-0">{{ project.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <div class="mb-3">
+                        <i class="bi bi-images fs-1 text-muted opacity-50"></i>
+                    </div>
+                    <h5>No portfolio items yet</h5>
+                    <p class="text-muted">Projects added will appear here.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Services Tab -->
+            <div class="tab-pane fade" id="services" role="tabpanel">
+                <h4 class="fw-bold mb-4">Active Services</h4>
+                {% if services %}
+                <div class="row g-4">
+                    {% for service in services %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="skill-card h-100" style="cursor: pointer;"
+                            onclick="window.location.href='{{ url_for('service.detail', service_id=service.id) }}'">
+                            <div class="card-image-wrapper">
+                                <img src="{{ service.get_image_url() }}" alt="{{ service.title }}"
+                                    onerror="this.style.display='none';">
+                                <div class="category-badge">
+                                    <i class="bi bi-tag-fill me-1"></i> {{ service.category.name }}
+                                </div>
+                            </div>
+                            <div class="card-content p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="rating-badge">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <span>{{ service.get_average_rating() }}</span>
+                                    </div>
+                                    <div class="price-tag">₹{{ "%.0f"|format(service.price) }}</div>
+                                </div>
+                                <h6 class="fw-bold mb-2 text-dark">{{ service.title }}</h6>
+                                <p class="text-muted small mb-0 line-clamp-2">{{ service.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <div class="mb-3">
+                        <i class="bi bi-briefcase fs-1 text-muted opacity-50"></i>
+                    </div>
+                    <h5>No services available</h5>
+                    <p class="text-muted">This user hasn't published any services yet.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <h4 class="fw-bold mb-4">Client Reviews</h4>
+                <div class="bg-white rounded-4 shadow-sm p-4">
+                    <div class="text-center py-5">
+                        <i class="bi bi-chat-quote fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                        <h5>No reviews yet</h5>
+                        <p class="text-muted">Reviews from satisfied clients will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: var(--primary-color);
+        border-bottom-color: rgba(var(--primary-rgb), 0.3) !important;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color) !important;
+    }
+
+    .group:hover .group-hover-scale {
+        transform: scale(1.05);
+    }
+
+    .group:hover .group-hover-opacity {
+        opacity: 1 !important;
+    }
+</style>
+{% endblock %}
+
+<style>
+    body {
+        background-color: #f8fafc;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+</style>

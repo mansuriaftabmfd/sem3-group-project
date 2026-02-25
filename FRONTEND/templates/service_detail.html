@@ -1,0 +1,935 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.title }} - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+<style>
+    /* Star Rating - all stars default to grey */
+    .rating-select label {
+        color: #6c757d !important;
+        cursor: pointer;
+        transition: color 0.15s ease;
+    }
+
+    /* On hover: highlight hovered star and all stars after it (which appear to the LEFT due to flex-row-reverse) */
+    .rating-select label:hover,
+    .rating-select label:hover~label {
+        color: #ffc107 !important;
+    }
+
+    /* When a radio is checked: highlight its label and all labels after it (LEFT stars in visual order) */
+    .rating-select input:checked~label {
+        color: #ffc107 !important;
+    }
+
+    /* FullCalendar Customization */
+    .fc {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .fc-event {
+        cursor: pointer;
+        transition: transform 0.2s;
+        border: none !important;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .fc-event:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border: none;
+        border-radius: 1.5rem;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-sweep {
+        position: relative;
+        overflow: hidden;
+        transition: color 0.3s;
+        z-index: 1;
+    }
+
+    .btn-sweep:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.2);
+        transition: width 0.3s;
+        z-index: -1;
+    }
+
+    .btn-sweep:hover:after {
+        width: 100%;
+    }
+
+    /* Slow spinning animation for in-progress indicator */
+    .spin-slow {
+        animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 min-vh-100" style="margin-top: 60px;">
+    <div class="container">
+
+        {% if not service.is_approved %}
+        <!-- Approval Status Banner -->
+        <div class="row justify-content-center mb-4 fade-in-up">
+            <div class="col-lg-10">
+                {% if service.rejection_reason %}
+                <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+                    <div class="card-body p-4" style="border-left: 4px solid #DC2626;">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 44px; height: 44px; background: rgba(220, 38, 38, 0.1);">
+                                <i class="bi bi-x-circle-fill fs-5" style="color: #DC2626;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1" style="color: #DC2626;">Service Rejected</h6>
+                                <p class="text-muted small mb-2">This service was not approved and is not visible to the
+                                    public.</p>
+                                <div class="bg-light rounded-3 p-3 mb-2">
+                                    <small class="text-muted fw-semibold d-block mb-1">Rejection Reason:</small>
+                                    <span class="fw-medium">{{ service.rejection_reason }}</span>
+                                </div>
+                                {% if current_user.is_authenticated and service.user_id == current_user.id %}
+                                <small class="text-muted"><i class="bi bi-lightbulb me-1"></i>Edit your service to
+                                    address the feedback, then it will be re-submitted for review.</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+                    <div class="card-body p-4" style="border-left: 4px solid #F59E0B;">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 44px; height: 44px; background: rgba(245, 158, 11, 0.1);">
+                                <i class="bi bi-clock-history fs-5" style="color: #D97706;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1" style="color: #D97706;">Pending Admin Approval</h6>
+                                <p class="text-muted small mb-0">This service is under review and will become visible
+                                    once approved.</p>
+                                {% if current_user.is_authenticated and current_user.is_admin() %}
+                                <div class="mt-3 d-flex gap-2">
+                                    <form method="POST"
+                                        action="{{ url_for('admin.approve_service', service_id=service.id) }}"
+                                        class="d-inline">
+                                        <button type="submit"
+                                            class="btn btn-success rounded-pill px-4 shadow-sm btn-sm">
+                                            <i class="bi bi-check-circle me-1"></i>Approve
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-outline-danger rounded-pill px-4 btn-sm"
+                                        data-bs-toggle="modal" data-bs-target="#rejectFromDetailModal">
+                                        <i class="bi bi-x-circle me-1"></i>Reject
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        <!-- Breadcrumb & Title -->
+        <div class="row justify-content-center mb-4 fade-in-up">
+            <div class="col-lg-10">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a href="{{ url_for('service.browse') }}"
+                                class="text-decoration-none text-muted">Services</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">{{
+                                service.category.name }}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ service.title|truncate(30) }}</li>
+                    </ol>
+                </nav>
+                <h1 class="fw-bold display-6 mb-3">{{ service.title }}</h1>
+                <div class="d-flex align-items-center gap-3 mb-4 text-muted">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ service.provider.get_avatar_url() }}" class="rounded-circle me-2 shadow-sm"
+                            width="40" height="40" alt="{{ service.provider.username }}">
+                        <span class="fw-bold text-dark me-1">{{ service.provider.username }}</span>
+                        <span class="badge bg-light text-dark border ms-2">Level 2 Seller</span>
+                    </div>
+                    <div class="d-none d-md-block border-start h-50 mx-2"></div>
+                    <div class="d-flex align-items-center text-warning">
+                        <i class="bi bi-star-fill me-1"></i>
+                        <span class="fw-bold text-dark me-1">{{ service.get_average_rating() }}</span>
+                        <span class="text-muted text-decoration-underline">({{ service.get_review_count() }}
+                            reviews)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center g-5">
+            <!-- Main Content -->
+            <div class="col-lg-7 fade-in-up delay-100">
+                <!-- Gallery/Image -->
+                <div class="card border-0 rounded-4 overflow-hidden shadow-sm mb-5 position-relative group">
+                    <img src="{{ service.get_image_url() }}" class="img-fluid w-100 object-fit-cover"
+                        style="height: 450px;" alt="{{ service.title }}"
+                        onerror="this.src='https://via.placeholder.com/800x450?text=Service+Image'">
+                    <button
+                        class="btn btn-light rounded-circle position-absolute top-0 end-0 m-3 shadow-sm text-danger hover-scale"
+                        onclick="toggleFavorite({{ service.id }}, this)">
+                        <i class="bi bi-heart{% if is_favorited %}-fill{% endif %}"></i>
+                    </button>
+                </div>
+
+                <!-- About Gig -->
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-4">About This Service</h3>
+                    <div class="text-muted fs-6 lh-lg" style="white-space: pre-line;">{{ service.description }}</div>
+                </div>
+
+                <!-- Skills/Tags -->
+                <div class="mb-5">
+                    <h5 class="fw-bold mb-3">Skills & Tools</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in service.get_tags_list() %}
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-medium">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <hr class="my-5 opacity-10">
+
+                <!-- About Provider -->
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4">About The Seller</h4>
+                    <div class="card border-0 bg-light rounded-4 p-4">
+                        <div
+                            class="d-flex flex-column flex-sm-row gap-4 align-items-center align-items-sm-start text-center text-sm-start">
+                            <div class="position-relative">
+                                <img src="{{ service.provider.get_avatar_url() }}" class="rounded-circle shadow-sm"
+                                    width="100" height="100" alt="{{ service.provider.username }}">
+                                <span
+                                    class="position-absolute bottom-0 end-0 p-2 bg-success border border-4 border-white rounded-circle"></span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold mb-1">{{ service.provider.full_name or service.provider.username }}
+                                </h5>
+                                <p class="text-muted mb-3">{{ service.provider.bio or 'Professional Service Provider' }}
+                                </p>
+                                <div class="d-flex justify-content-center justify-content-sm-start gap-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="fw-bold fs-5">{{ service.provider.get_average_rating() }}</div>
+                                        <div class="small text-muted">Rating</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fw-bold fs-5">{{ service.provider.get_total_reviews() }}</div>
+                                        <div class="small text-muted">Reviews</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fw-bold fs-5">24h</div>
+                                        <div class="small text-muted">Response</div>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('user.profile', username=service.provider.username) }}"
+                                    class="btn btn-primary rounded-pill px-4 btn-sweep">See Full Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="fw-bold mb-0">Reviews ({{ reviews|length }})</h4>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle rounded-pill px-3"
+                                data-bs-toggle="dropdown">Most Recent</button>
+                            <ul class="dropdown-menu border-0 shadow-sm">
+                                <li><a class="dropdown-item" href="#">Most Recent</a></li>
+                                <li><a class="dropdown-item" href="#">Positive First</a></li>
+                                <li><a class="dropdown-item" href="#">Negative First</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if reviews %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for review in reviews %}
+                        <div class="card border-0 shadow-sm rounded-4 p-4 hover-scale transition-all">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ review.reviewer.get_avatar_url() }}" class="rounded-circle me-3"
+                                        width="48" height="48">
+                                    <div>
+                                        <h6 class="fw-bold mb-0">{{ review.reviewer.username }}</h6>
+                                        <div class="small text-muted">{{ review.created_at.strftime('%b %d, %Y') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex text-warning small bg-light px-2 py-1 rounded-pill">
+                                    <i class="bi bi-star-fill me-1"></i>
+                                    <span class="fw-bold text-dark">{{ review.rating }}</span>
+                                </div>
+                            </div>
+                            <p class="text-muted mb-0">{{ review.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 bg-light rounded-4">
+                        <div class="mb-3">
+                            <i class="bi bi-chat-heart fs-1 text-muted opacity-50"></i>
+                        </div>
+                        <h5>No reviews yet</h5>
+                        <p class="text-muted">Be the first to share your experience!</p>
+                    </div>
+                    {% endif %}
+
+                    {% if current_user.is_authenticated and current_user.id != service.user_id and
+                    current_user.user_type != 'admin' %}
+                    <div class="mt-4">
+                        <button class="btn btn-link text-primary text-decoration-none fw-bold p-0" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#reviewForm">
+                            <i class="bi bi-plus-circle me-2"></i>Write a Review
+                        </button>
+                        <div class="collapse mt-3" id="reviewForm">
+                            <form method="POST" action="{{ url_for('service.add_review', service_id=service.id) }}"
+                                class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Rating</label>
+                                    <div class="rating-select d-flex flex-row-reverse justify-content-end gap-2">
+                                        {% for i in range(5, 0, -1) %}
+                                        <input type="radio" name="rating" value="{{ i }}" id="rat{{ i }}" class="d-none"
+                                            required>
+                                        <label for="rat{{ i }}" class="fs-4 cursor-pointer"><i
+                                                class="bi bi-star-fill"></i></label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Comments</label>
+                                    <textarea class="form-control border-0" name="comment" rows="3"
+                                        placeholder="Share your experience..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary rounded-pill btn-sweep">Post
+                                    Review</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sticky Sidebar -->
+            <div class="col-lg-4">
+                <div class="sticky-top fade-in-up delay-200" style="top: 100px; z-index: 10;">
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4"
+                        style="background: var(--card-bg);">
+                        <div class="card-header bg-white border-0 py-4 px-4 pb-0 text-center">
+                            <p class="text-muted small text-uppercase fw-bold mb-1">Standard Package</p>
+                            <h2 class="display-5 fw-bold text-gradient mb-0">₹{{ "%.0f"|format(service.price) }}</h2>
+                        </div>
+                        <div class="card-body p-4">
+                            <div
+                                class="d-flex justify-content-center align-items-center gap-4 mb-4 text-muted small fw-bold text-uppercase">
+                                <span><i class="bi bi-clock me-1"></i>{{ service.delivery_time }} Delivery</span>
+                                <span><i class="bi bi-arrow-repeat me-1"></i>1 Revision</span>
+                            </div>
+
+                            <ul class="list-unstyled mb-4 text-start d-inline-block mx-auto">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Source File
+                                    Included</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>High
+                                    Resolution</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Commercial Use
+                                </li>
+                                <li class="text-muted"><i class="bi bi-check-circle me-2"></i>Priority Support</li>
+                            </ul>
+
+                            {% if current_user.is_authenticated %}
+                            {% if current_user.id != service.user_id and current_user.user_type != 'admin' %}
+                            <div class="d-grid gap-3">
+                                {% if existing_order %}
+                                {# User has an ACTIVE order - Show Chat instead of Order Now #}
+
+                                {# Order Status Badge #}
+                                {% if existing_order.status == 'pending' %}
+                                <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center mb-0">
+                                    <i class="bi bi-hourglass-split fs-5 me-2"></i>
+                                    <div>
+                                        <strong>Order Pending</strong>
+                                        <div class="small opacity-75">Waiting for seller to accept</div>
+                                    </div>
+                                </div>
+                                {% elif existing_order.status == 'in_progress' %}
+                                <div class="alert alert-info border-0 rounded-4 d-flex align-items-center mb-0">
+                                    <i class="bi bi-gear-wide-connected fs-5 me-2 spin-slow"></i>
+                                    <div>
+                                        <strong>Work In Progress</strong>
+                                        <div class="small opacity-75">Seller is working on your order</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                {# CHAT BUTTON - Always visible for active orders #}
+                                <a href="{{ url_for('user.order_detail', order_id=existing_order.id) }}"
+                                    class="btn btn-success btn-lg rounded-pill shadow-sm btn-sweep">
+                                    <i class="bi bi-chat-dots-fill me-2"></i>Chat with Seller
+                                </a>
+
+                                {% else %}
+                                {# No active order - Show wallet balance and Order Now button #}
+
+                                <!-- WALLET BALANCE INDICATOR -->
+                                <div class="card border-0 rounded-3 mb-2"
+                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <div class="card-body p-3 text-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-white-50"><i class="bi bi-wallet2 me-1"></i>Your
+                                                    Wallet</small>
+                                                <h5 class="mb-0 fw-bold" id="sidebar-wallet-balance">₹0</h5>
+                                            </div>
+                                            <a href="{{ url_for('user.wallet') }}"
+                                                class="btn btn-light btn-sm rounded-pill shadow-sm">
+                                                <i class="bi bi-plus-lg"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Balance Check Warning (updated by JS) -->
+                                <div id="balance-warning-container" data-service-price="{{ service.price }}">
+                                    <!-- This will be populated by JavaScript -->
+                                </div>
+
+                                <button type="button" class="btn btn-primary btn-lg rounded-pill btn-sweep shadow-sm"
+                                    data-bs-toggle="modal" data-bs-target="#orderModal">
+                                    <i class="bi bi-bag-check me-2"></i>Order Now
+                                </button>
+
+                                <button class="btn btn-outline-secondary rounded-pill"
+                                    onclick="showContactModal('{{ service.provider.phone or '' }}')">Contact Me</button>
+                                {% endif %}
+                            </div>
+                            {% elif current_user.user_type != 'admin' %}
+                            {# Service owner (non-admin) - Show edit options #}
+                            <div class="d-grid gap-3">
+                                <a href="{{ url_for('service.edit', service_id=service.id) }}"
+                                    class="btn btn-warning btn-lg rounded-pill shadow-sm">
+                                    <i class="bi bi-pencil me-2"></i>Edit Service
+                                </a>
+                                <a href="{{ url_for('availability.manage') }}"
+                                    class="btn btn-outline-primary btn-lg rounded-pill shadow-sm">
+                                    <i class="bi bi-calendar-check me-2"></i>Manage Availability
+                                </a>
+                            </div>
+                            {% else %}
+                            {# Admin viewing service - Show nothing or admin actions #}
+                            <div class="alert alert-info border-0 rounded-4">
+                                <i class="bi bi-shield-check me-2"></i>
+                                <strong>Admin View</strong>
+                                <div class="small mt-1">You can approve or reject this service from the admin panel.</div>
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <a href="{{ url_for('auth.login') }}"
+                                class="btn btn-primary w-100 btn-lg rounded-pill btn-sweep mb-3">
+                                Log In to Order
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <small class="text-muted"><i class="bi bi-shield-check me-1"></i>100% Secure Payment</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Order Modal (Fixed Price) -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light p-4">
+                <div>
+                    <h5 class="modal-title fw-bold">Customize Your Order</h5>
+                    <p class="text-muted small mb-0">{{ service.title }}</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('service.place_order', service_id=service.id) }}" id="orderForm">
+                <div class="modal-body p-4">
+
+                    <!-- WALLET BALANCE DISPLAY (Important for validation) -->
+                    {% if current_user.is_authenticated %}
+                    <div class="card border-0 bg-gradient mb-4"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="card-body p-3 text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-white-50">Your Wallet Balance</small>
+                                    <h4 class="mb-0 fw-bold" id="walletBalanceDisplay">₹0</h4>
+                                    <!-- This will be updated by JavaScript with calculated balance -->
+                                </div>
+                                <a href="{{ url_for('user.wallet') }}" class="btn btn-light btn-sm rounded-pill">
+                                    <i class="bi bi-plus-lg me-1"></i>Add Money
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insufficient Balance Warning -->
+                    <div class="alert alert-danger border-0 rounded-3 d-none" id="insufficientBalanceAlert">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-exclamation-triangle-fill fs-5 me-2 mt-1"></i>
+                            <div>
+                                <strong>Insufficient Balance!</strong>
+                                <p class="mb-2 small">You need <span id="requiredAmount">₹0</span> but have only <span
+                                        id="availableAmount">₹0</span>.</p>
+                                <a href="{{ url_for('user.wallet') }}" class="btn btn-danger btn-sm rounded-pill">
+                                    <i class="bi bi-wallet2 me-1"></i>Add ₹<span id="shortfallAmount">0</span> to Wallet
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Package</label>
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="budget_tier" id="tier1" value="Basic"
+                                onchange="updatePricePreview()">
+                            <label class="btn btn-outline-primary flex-grow-1 rounded-3 py-3" for="tier1">
+                                <div>Basic</div>
+                                <small class="text-muted">₹{{ "%.0f"|format(service.price * 0.8) }}</small>
+                            </label>
+
+                            <input type="radio" class="btn-check" name="budget_tier" id="tier2" value="Standard" checked
+                                onchange="updatePricePreview()">
+                            <label class="btn btn-outline-primary flex-grow-1 rounded-3 py-3" for="tier2">
+                                <div>Standard</div>
+                                <small class="text-muted">₹{{ "%.0f"|format(service.price) }}</small>
+                            </label>
+
+                            <input type="radio" class="btn-check" name="budget_tier" id="tier3" value="Premium"
+                                onchange="updatePricePreview()">
+                            <label class="btn btn-outline-primary flex-grow-1 rounded-3 py-3" for="tier3">
+                                <div>Premium</div>
+                                <small class="text-muted">₹{{ "%.0f"|format(service.price * 1.5) }}</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Price Summary -->
+                    <div class="card bg-light border-0 rounded-3 mb-4">
+                        <div class="card-body py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Order Total</span>
+                                <span class="fw-bold fs-5 text-primary" id="orderTotalDisplay">₹{{
+                                    "%.0f"|format(service.price) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center small" id="balanceAfterOrder">
+                                <span class="text-muted">Balance After Order</span>
+                                <span class="fw-semibold" id="balanceAfterDisplay">₹{{ (wallet_balance|default(0) -
+                                    service.price)|int }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Requirements</label>
+                        <textarea class="form-control bg-light border-0 rounded-3" name="requirements" rows="4"
+                            placeholder="Describe what you need..." required></textarea>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill btn-sweep px-5" id="checkoutBtn">
+                        <i class="bi bi-wallet2 me-2"></i>Pay from Wallet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Wallet and Price Validation JavaScript (Unit-9: DOM, Unit-10: Events)
+
+    // =========================================================================
+    // WALLET BALANCE FROM BACKEND (Single Source of Truth)
+    // =========================================================================
+    // Server-provided wallet balance (from Flask/Python - wallets.txt)
+    const MODAL_WALLET_BALANCE = {{ wallet_balance|default (0) }};
+
+    /**
+     * Get wallet balance from SERVER (passed by Flask)
+     * Backend (wallets.txt) is the single source of truth
+     */
+    function getLocalWalletBalance() {
+        return MODAL_WALLET_BALANCE;
+    }
+
+    // Use server-provided balance
+    let walletBalance = MODAL_WALLET_BALANCE;
+    const basePrice = {{ service.price }};
+
+    function updatePricePreview() {
+        // Use SERVER balance (no need to recalculate)
+        walletBalance = MODAL_WALLET_BALANCE;
+
+        // UPDATE MODAL WALLET BALANCE DISPLAY
+        const walletBalanceDisplay = document.getElementById('walletBalanceDisplay');
+        if (walletBalanceDisplay) {
+            walletBalanceDisplay.textContent = '₹' + Math.round(walletBalance);
+        }
+
+        const selectedTier = document.querySelector('input[name="budget_tier"]:checked');
+        if (!selectedTier) return;
+
+        let orderPrice = basePrice;
+
+        if (selectedTier.value === 'Basic') {
+            orderPrice = basePrice * 0.8;
+        } else if (selectedTier.value === 'Premium') {
+            orderPrice = basePrice * 1.5;
+        }
+
+        // Update displays
+        document.getElementById('orderTotalDisplay').textContent = '₹' + Math.round(orderPrice);
+
+        const balanceAfter = walletBalance - orderPrice;
+        const balanceAfterDisplay = document.getElementById('balanceAfterDisplay');
+        balanceAfterDisplay.textContent = '₹' + Math.round(balanceAfter);
+
+        // Show warning if insufficient balance
+        const insufficientAlert = document.getElementById('insufficientBalanceAlert');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        if (balanceAfter < 0) {
+            // Insufficient balance
+            insufficientAlert.classList.remove('d-none');
+            document.getElementById('requiredAmount').textContent = '₹' + Math.round(orderPrice);
+            document.getElementById('availableAmount').textContent = '₹' + Math.round(walletBalance);
+            document.getElementById('shortfallAmount').textContent = Math.round(orderPrice - walletBalance);
+
+            balanceAfterDisplay.classList.add('text-danger');
+            balanceAfterDisplay.classList.remove('text-success');
+
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Insufficient Balance';
+            checkoutBtn.classList.remove('btn-primary');
+            checkoutBtn.classList.add('btn-secondary');
+        } else {
+            // Sufficient balance
+            insufficientAlert.classList.add('d-none');
+
+            balanceAfterDisplay.classList.remove('text-danger');
+            balanceAfterDisplay.classList.add('text-success');
+
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = '<i class="bi bi-wallet2 me-2"></i>Pay from Wallet';
+            checkoutBtn.classList.add('btn-primary');
+            checkoutBtn.classList.remove('btn-secondary');
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        updatePricePreview();
+    });
+
+    /**
+     * Show contact info in a beautiful modal
+     */
+    function showContactModal(phoneNumber) {
+        const modalBody = document.getElementById('contactModalBody');
+        if (phoneNumber && phoneNumber !== 'None' && phoneNumber.trim() !== '') {
+            modalBody.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-telephone-fill text-primary display-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Contact Number</h5>
+                    <p class="fs-4 text-dark mb-0 font-monospace">${phoneNumber}</p>
+                    <p class="text-muted small mt-2">Please mention SkillVerse when calling.</p>
+                </div>
+            `;
+        } else {
+            modalBody.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-telephone-x text-muted display-4"></i>
+                    </div>
+                    <h5 class="fw-bold text-muted">Contact Info Unavailable</h5>
+                    <p class="text-danger fw-bold mt-3">NO IS NOT AVAILABLE</p>
+                </div>
+            `;
+        }
+        const contactModal = new bootstrap.Modal(document.getElementById('contactInfoModal'));
+        contactModal.show();
+    }
+</script>
+
+<!-- Contact Info Modal -->
+<div class="modal fade" id="contactInfoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contactModalBody">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Modal -->
+<div class="modal fade" id="calendarModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light p-4">
+                <div>
+                    <h5 class="modal-title fw-bold">Select a Session</h5>
+                    <p class="text-muted small mb-0">Book a time with {{ service.provider.username }}</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info border-0 d-flex align-items-center mb-3">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <div>Times are displayed in your local time zone.</div>
+                </div>
+                <div id="bookingCalendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Booking Modal -->
+<div class="modal fade" id="confirmBookingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 bg-light p-4">
+                <h5 class="modal-title fw-bold">Confirm Booking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('availability.book_slot') }}" method="POST">
+                <input type="hidden" name="slot_id" id="selectedSlotId">
+                <input type="hidden" name="service_id" value="{{ service.id }}">
+
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <div
+                            class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3">
+                            <i class="bi bi-calendar-check fs-1"></i>
+                        </div>
+                        <h4 class="fw-bold" id="selectedTimeDisplay"></h4>
+                        <p class="text-muted">with {{ service.provider.username }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Notes for Provider</label>
+                        <textarea class="form-control bg-light border-0 rounded-3" name="notes" rows="3"
+                            placeholder="What would you like to discuss?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 justify-content-center gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 btn-sweep">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% if current_user.is_authenticated and current_user.is_admin() and not service.is_approved %}
+<!-- Reject from Detail Modal -->
+<div class="modal fade" id="rejectFromDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-x-circle text-danger me-2"></i>Reject "{{ service.title }}"
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.reject_service', service_id=service.id) }}">
+                <div class="modal-body">
+                    <label class="form-label fw-semibold">Reason for rejection</label>
+                    <textarea name="reason" class="form-control rounded-3" rows="3"
+                        placeholder="e.g. Incomplete description, inappropriate content, duplicate service..."></textarea>
+                    <div class="form-text mt-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The provider will be notified with this reason.
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">
+                        <i class="bi bi-x-circle me-1"></i>Reject Service
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('bookingCalendar');
+        var calendarModal = document.getElementById('calendarModal');
+        var confirmModal = new bootstrap.Modal(document.getElementById('confirmBookingModal'));
+        var calendar = null;
+
+        // Initialize calendar when modal is shown
+        calendarModal.addEventListener('shown.bs.modal', function () {
+            if (calendar) {
+                calendar.render();
+                return;
+            }
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                timeZone: 'local',
+                allDaySlot: false,
+                slotMinTime: '08:00:00',
+                slotMaxTime: '22:00:00',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                // Fetch public slots for this provider
+                events: '/availability/provider/{{ service.provider.id }}/slots',
+                eventClick: function (info) {
+                    // Open confirmation modal
+                    const slot = info.event;
+
+                    document.getElementById('selectedSlotId').value = slot.id;
+
+                    const start = slot.start.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const end = slot.end.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
+
+                    document.getElementById('selectedTimeDisplay').textContent = `${start} - ${end}`;
+
+                    // Hide calendar modal and show confirm modal
+                    bootstrap.Modal.getInstance(calendarModal).hide();
+                    confirmModal.show();
+                },
+                eventMouseEnter: function (info) {
+                    info.el.style.cursor = 'pointer';
+                },
+                eventDidMount: function (info) {
+                    info.el.style.backgroundColor = '#10b981'; // Emerald Green
+                    info.el.style.borderColor = '#10b981';
+                }
+            });
+
+            calendar.render();
+        });
+    });
+
+    // =========================================================================
+    // WALLET BALANCE FROM BACKEND (Single Source of Truth)
+    // =========================================================================
+
+    // Note: MODAL_WALLET_BALANCE is already defined above in the order modal script
+    // Reuse that constant for consistency
+
+    /**
+     * Get wallet balance from SERVER (passed by Flask)
+     * Backend (wallets.txt) is the single source of truth
+     */
+    function getWalletBalance() {
+        return MODAL_WALLET_BALANCE;
+    }
+
+    /**
+     * Update the wallet balance display in sidebar
+     */
+    function updateSidebarWalletBalance() {
+        const balance = getWalletBalance();
+
+        // Update the sidebar wallet balance display
+        const balanceElement = document.getElementById('sidebar-wallet-balance');
+        if (balanceElement) {
+            balanceElement.textContent = '₹' + balance.toFixed(0);
+        }
+
+        // Update the warning container
+        const warningContainer = document.getElementById('balance-warning-container');
+        if (warningContainer) {
+            const servicePrice = parseFloat(warningContainer.dataset.servicePrice) || 0;
+
+            if (balance < servicePrice) {
+                const needed = Math.ceil(servicePrice - balance);
+                warningContainer.innerHTML = `
+                    <div class="alert alert-danger border-0 rounded-3 py-2 px-3 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <small>Need ₹${needed} more to order</small>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Sufficient balance - show success message
+                warningContainer.innerHTML = `
+                    <div class="alert alert-success border-0 rounded-3 py-2 px-3 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <small>Sufficient balance for this order</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Also update the modal wallet display if it exists
+        const modalBalanceElement = document.getElementById('modal-wallet-balance');
+        if (modalBalanceElement) {
+            modalBalanceElement.textContent = '₹' + balance.toFixed(0);
+        }
+
+        // Sync localStorage
+        localStorage.setItem('skillverse_wallet_balance', balance.toString());
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        updateSidebarWalletBalance();
+    });
+</script>
+{% endblock %}

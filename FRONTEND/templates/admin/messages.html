@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Messages - Admin{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container" style="padding-top: 5rem;">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="fw-bold">Contact Messages</h2>
+                <p class="text-muted">View messages sent via Contact Us form</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Subject</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for message in messages %}
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">{{ message.name }}</div>
+                                </td>
+                                <td>
+                                    <div><a href="mailto:{{ message.email }}" class="text-decoration-none">{{
+                                            message.email }}</a></div>
+                                    {% if message.phone %}
+                                    <div class="small text-muted">{{ message.phone }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ message.subject }}</td>
+                                <td>
+                                    <div style="max-width: 300px; white-space: pre-wrap;" class="small">{{
+                                        message.message }}</div>
+                                </td>
+                                <td class="text-nowrap text-muted small">
+                                    {{ message.created_at.strftime('%b %d, %Y %H:%M') }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                    No messages found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

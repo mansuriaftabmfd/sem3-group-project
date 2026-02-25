@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - SkillVerse{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 bg-surface-secondary py-5" style="margin-top: 60px;">
+    <div class="container" style="max-width: 1000px;">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-end mb-4 fade-in-up">
+            <div>
+                <h2 class="fw-bold text-heading ls-tight mb-1">My Orders</h2>
+                <p class="text-muted text-sm mb-0">Track all your service orders and transactions.</p>
+            </div>
+
+            {% if current_user.user_type == 'provider' %}
+            <div class="nav nav-pills nav-pills-sm border rounded-pill p-1 bg-surface-card shadow-sm" role="tablist">
+                <button class="nav-link rounded-pill active px-3 text-sm fw-medium" data-bs-toggle="pill"
+                    data-bs-target="#buyer-orders">
+                    Purchases
+                </button>
+                <button class="nav-link rounded-pill px-3 text-sm fw-medium" data-bs-toggle="pill"
+                    data-bs-target="#seller-orders">
+                    Sales
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-content" id="ordersTabContent">
+            <!-- BUYER ORDERS TAB -->
+            <div class="tab-pane fade show active" id="buyer-orders" role="tabpanel">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden fade-in-up delay-100">
+                    <!-- Column Headers (Desktop) -->
+                    <div
+                        class="d-none d-md-flex px-4 py-3 border-bottom bg-surface-tertiary text-xs fw-semibold text-muted text-uppercase ls-wide">
+                        <div class="col-4 ps-2">Service</div>
+                        <div class="col-3">Provider</div>
+                        <div class="col-2">Date</div>
+                        <div class="col-2">Status</div>
+                        <div class="col-1 text-end pe-2">Price</div>
+                    </div>
+
+                    {% if orders_as_buyer %}
+                    <div class="list-group list-group-flush">
+                        {% for order in orders_as_buyer %}
+                        <a href="{{ url_for('user.order_detail', order_id=order.id) }}"
+                            class="list-group-item list-group-item-action p-4 border-bottom position-relative transition-all hover-bg-surface-secondary">
+                            <div class="row align-items-center g-3">
+                                <!-- Service Info -->
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div
+                                            class="avatar rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0">
+                                            <i class="bi bi-box-seam fs-5"></i>
+                                        </div>
+                                        <div style="min-width: 0; flex: 1;">
+                                            <h6 class="fw-semibold text-heading mb-0 text-truncate">{{
+                                                order.service.title }}</h6>
+                                            <span class="text-xs text-muted">Order #{{ order.id }}</span>
+                                            {% if order.status == 'cancelled' and order.rejection_reason %}
+                                            <div class="mt-1">
+                                                <small class="text-danger"><i class="bi bi-info-circle-fill me-1"></i>{{ order.rejection_reason[:50] }}{% if order.rejection_reason|length > 50 %}...{% endif %}</small>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Provider -->
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="{{ order.service.provider.get_avatar_url() }}"
+                                            class="avatar-sm rounded-circle" alt="">
+                                        <span class="text-sm fw-medium text-heading">{{ order.service.provider.username
+                                            }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Date -->
+                                <div class="col-md-2">
+                                    <span class="text-sm text-muted">{{ order.created_at.strftime('%b %d, %Y') }}</span>
+                                </div>
+
+                                <!-- Status Badge -->
+                                <div class="col-md-2">
+                                    {% set status_class = 'bg-secondary-subtle text-secondary' %}
+                                    {% set status_icon = 'bi-circle' %}
+
+                                    {% if order.status == 'pending' %}
+                                    {% set status_class = 'bg-warning-subtle text-warning' %}
+                                    {% set status_icon = 'bi-hourglass-split' %}
+                                    {% elif order.status == 'in_progress' %}
+                                    {% set status_class = 'bg-primary-subtle text-primary' %}
+                                    {% set status_icon = 'bi-gear-wide-connected' %}
+                                    {% elif order.status == 'completed' %}
+                                    {% set status_class = 'bg-success-subtle text-success' %}
+                                    {% set status_icon = 'bi-check-circle-fill' %}
+                                    {% elif order.status == 'cancelled' %}
+                                    {% set status_class = 'bg-danger-subtle text-danger' %}
+                                    {% set status_icon = 'bi-x-circle-fill' %}
+                                    {% endif %}
+
+                                    <span
+                                        class="badge rounded-pill {{ status_class }} border border-opacity-10 px-2 py-1 gap-1">
+                                        <i class="bi {{ status_icon }}"></i>
+                                        {{ order.status|replace('_', ' ')|title }}
+                                    </span>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="col-md-1 text-md-end">
+                                    <span class="fw-bold text-heading">₹{{ "%.0f"|format(order.service.price) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <div
+                                class="avatar avatar-xl rounded-circle bg-surface-secondary text-muted d-inline-flex align-items-center justify-content-center">
+                                <i class="bi bi-cart3 fs-1"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-heading mb-2">No orders yet</h4>
+                        <p class="text-muted text-sm mb-4">Start exploring services to place your first order.</p>
+                        <a href="{{ url_for('service.browse') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            Browse Services
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- SELLER ORDERS TAB (Providers Only) -->
+            {% if current_user.user_type == 'provider' %}
+            <div class="tab-pane fade" id="seller-orders" role="tabpanel">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-surface-card">
+                    <!-- Column Headers -->
+                    <div
+                        class="d-none d-md-flex px-4 py-3 border-bottom bg-surface-tertiary text-xs fw-semibold text-muted text-uppercase ls-wide">
+                        <div class="col-4 ps-2">Service Sold</div>
+                        <div class="col-3">Buyer</div>
+                        <div class="col-2">Date</div>
+                        <div class="col-2">Status</div>
+                        <div class="col-1 text-end pe-2">Earnings</div>
+                    </div>
+
+                    {% if orders_as_seller %}
+                    <div class="list-group list-group-flush">
+                        {% for order in orders_as_seller %}
+                        <a href="{{ url_for('user.order_detail', order_id=order.id) }}"
+                            class="list-group-item list-group-item-action p-4 border-bottom position-relative transition-all hover-bg-surface-secondary">
+                            <div class="row align-items-center g-3">
+                                <!-- Service Info -->
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div
+                                            class="avatar rounded-3 bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0">
+                                            <i class="bi bi-graph-up-arrow fs-5"></i>
+                                        </div>
+                                        <div style="min-width: 0; flex: 1;">
+                                            <h6 class="fw-semibold text-heading mb-0 text-truncate">{{
+                                                order.service.title }}</h6>
+                                            <span class="text-xs text-muted">Order #{{ order.id }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Buyer -->
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="{{ order.buyer.get_avatar_url() }}" class="avatar-sm rounded-circle"
+                                            alt="">
+                                        <span class="text-sm fw-medium text-heading">{{ order.buyer.username }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Date -->
+                                <div class="col-md-2">
+                                    <span class="text-sm text-muted">{{ order.created_at.strftime('%b %d, %Y') }}</span>
+                                </div>
+
+                                <!-- Status Badge -->
+                                <div class="col-md-2">
+                                    {% set status_class = 'bg-secondary-subtle text-secondary' %}
+
+                                    {% if order.status == 'pending' %}
+                                    {% set status_class = 'bg-warning-subtle text-warning' %}
+                                    {% elif order.status == 'in_progress' %}
+                                    {% set status_class = 'bg-primary-subtle text-primary' %}
+                                    {% elif order.status == 'completed' %}
+                                    {% set status_class = 'bg-success-subtle text-success' %}
+                                    {% elif order.status == 'cancelled' %}
+                                    {% set status_class = 'bg-danger-subtle text-danger' %}
+                                    {% endif %}
+
+                                    <span
+                                        class="badge rounded-pill {{ status_class }} border border-opacity-10 px-2 py-1">
+                                        {{ order.status|replace('_', ' ')|title }}
+                                    </span>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="col-md-1 text-md-end">
+                                    <span class="fw-bold text-success">+₹{{ "%.0f"|format(order.service.price) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <div
+                                class="avatar avatar-xl rounded-circle bg-surface-secondary text-muted d-inline-flex align-items-center justify-content-center">
+                                <i class="bi bi-wallet2 fs-1"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-heading mb-2">No active sales</h4>
+                        <p class="text-muted text-sm mb-0">Your listings are visible to thousands of users.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Shared Professional Design System (Same variables as Notifications page) */
+
+    :root {
+        --surface-secondary: #f8f9fa;
+        --surface-tertiary: #f1f5f9;
+        --surface-card: #ffffff;
+    }
+
+    [data-bs-theme="dark"] {
+        --surface-secondary: #0f172a;
+        --surface-tertiary: #1e293b;
+        --surface-card: #1e293b;
+    }
+
+    .bg-surface-secondary {
+        background-color: var(--surface-secondary) !important;
+    }
+
+    .bg-surface-tertiary {
+        background-color: var(--surface-tertiary) !important;
+    }
+
+    .bg-surface-card {
+        background-color: var(--surface-card) !important;
+    }
+
+    .card {
+        background-color: var(--surface-card);
+    }
+
+    .text-heading {
+        color: var(--bs-body-color);
+    }
+
+    .text-xs {
+        font-size: 0.75rem;
+    }
+
+    .text-sm {
+        font-size: 0.875rem;
+    }
+
+    .ls-tight {
+        letter-spacing: -0.015em;
+    }
+
+    .ls-wide {
+        letter-spacing: 0.05em;
+    }
+
+    /* Avatars */
+    .avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        object-fit: cover;
+    }
+
+    .avatar-xl {
+        width: 96px;
+        height: 96px;
+    }
+
+    /* Nav Pills */
+    .nav-pills-sm .nav-link {
+        padding: 0.25rem 1rem;
+        color: var(--bs-body-color);
+        transition: all 0.2s;
+    }
+
+    .nav-pills-sm .nav-link:hover {
+        background-color: var(--bs-secondary-bg);
+    }
+
+    .nav-pills-sm .nav-link.active {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+
+    /* List Item Interactions */
+    .list-group-item {
+        background-color: transparent;
+        /* Inherit card bg */
+        border-color: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    [data-bs-theme="dark"] .list-group-item {
+        border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .hover-bg-surface-secondary:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    [data-bs-theme="dark"] .hover-bg-surface-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Animations */
+    .fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

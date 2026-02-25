@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="{% block meta_description %}SkillVerse - Connect Skills with Opportunities{% endblock %}">
+    <title>{% block title %}SkillVerse - Learn Anything, Teach Everything{% endblock %}</title>
+
+    <!-- Enable browser caching -->
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
+
+    <!-- DNS Prefetch & Preconnect for faster external resource loading -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='images/favicon_transparent.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="{{ url_for('static', filename='images/favicon_transparent.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="{{ url_for('static', filename='images/favicon_transparent.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon_transparent.png') }}">
+
+    <!-- Critical CSS: Bootstrap (with media=print to avoid blocking) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <noscript>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </noscript>
+
+    <!-- Bootstrap Icons (non-blocking) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    </noscript>
+
+    <!-- Google Fonts with display=swap for faster text rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round&display=swap" rel="stylesheet">
+
+    <!-- Theme Init (Prevent Flash) - Inline for immediate execution -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-bs-theme', (t === 'dark' || (!t && d)) ? 'dark' : 'light');
+        })();
+    </script>
+
+    <!-- Custom CSS (Local styles - cached aggressively) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_fix.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/askvera.css') }}">
+
+    <style>
+        /* Page is visible immediately — no opacity transition for better perceived performance */
+        body {
+            opacity: 1;
+        }
+
+        /* Global Utilities (Tailwind replacements) */
+        .transition-all {
+            transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .w-full {
+            width: 100% !important;
+        }
+
+        .h-screen {
+            height: 100vh !important;
+        }
+
+        .group:hover .group-hover-scale {
+            transform: scale(1.05);
+            /* Restore default if missing */
+        }
+
+        /* Back to Top Button - Positioned to avoid chatbot conflict */
+        .back-to-top-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 42px;
+            /* Smaller size */
+            height: 42px;
+            /* Smaller size */
+            background: linear-gradient(to bottom, #d8b4fe 0%, #a855f7 100%);
+            /* Light Purple Top-to-Bottom */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 999;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .back-to-top-btn.show {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .back-to-top-btn:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+            background: linear-gradient(to bottom, #e9d5ff 0%, #c084fc 100%);
+            /* Lighter on hover */
+        }
+
+        .back-to-top-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Mobile responsive - Stack vertically on small screens */
+        @media (max-width: 768px) {
+            .back-to-top-btn {
+                bottom: 20px;
+                left: 20px;
+                /* Keep on left */
+                width: 38px;
+                /* Smaller for mobile */
+                height: 38px;
+                /* Smaller for mobile */
+                font-size: 16px;
+            }
+        }
+
+        /* Tablet - Adjust if needed */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .back-to-top-btn {
+                bottom: 25px;
+                left: 25px;
+            }
+        }
+
+        /* Dark mode support */
+        [data-bs-theme="dark"] .back-to-top-btn {
+            background: linear-gradient(to bottom, #d8b4fe 0%, #a855f7 100%);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        [data-bs-theme="dark"] .back-to-top-btn:hover {
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ACCESSIBILITY: Skip to Content -->
+    <a href="#main-content"
+        class="skip-link visually-hidden-focusable position-absolute top-0 start-0 p-3 bg-primary text-white z-3">
+        Skip to main content
+    </a>
+
+    <!-- Navigation Header -->
+    {% include 'components/header.html' %}
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Flash Messages -->
+        <div class="container position-fixed top-0 end-0 p-3" style="z-index: 1050; pointer-events: none;">
+            <div style="pointer-events: auto;">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm"
+                    role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top-btn" aria-label="Back to top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+    <!-- Bootstrap 5.3.3 JS Bundle (deferred for non-blocking load) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+    <!-- Custom JavaScript (deferred) -->
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+
+    <script>
+        // ================================================================
+        // NAVIGATION FIXES - Restore All Functionality + Fix Back Button
+        // ================================================================
+
+        // Page Transition Script
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
+
+            // Enable smooth scrolling globally
+            document.documentElement.style.scrollBehavior = 'smooth';
+
+            // ============================================================
+            // FIX 1: Handle hash navigation on page load (e.g., /#features)
+            // ============================================================
+            if (window.location.hash) {
+                setTimeout(function () {
+                    const target = document.querySelector(window.location.hash);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 300); // Delay to ensure page is loaded
+            }
+
+            // ============================================================
+            // FIX 2: Handle same-page anchor links (e.g., #features, #how-it-works)
+            // ============================================================
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href !== '#' && href.length > 1) {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            e.preventDefault();
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Update URL without reload
+                            history.pushState(null, null, href);
+                        }
+                    }
+                });
+            });
+
+            // ============================================================
+            // FIX 3: Handle cross-page anchor links (e.g., /browse to /#features)
+            // This allows navigation from any page to a specific section on homepage
+            // ============================================================
+            document.querySelectorAll('a[href*="#"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.includes('#') && !href.startsWith('#')) {
+                    link.addEventListener('click', function (e) {
+                        const [url, hash] = href.split('#');
+                        const currentPath = window.location.pathname;
+
+                        // If navigating to a different page with hash, let it navigate normally
+                        // The hash will be handled on page load by FIX 1
+                        if (url && url !== currentPath && url !== window.location.href.split('#')[0]) {
+                            return true; // Allow normal navigation
+                        } else if (hash) {
+                            // Same page, just scroll to hash
+                            e.preventDefault();
+                            const target = document.getElementById(hash);
+                            if (target) {
+                                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                history.pushState(null, null, '#' + hash);
+                            }
+                        }
+                    });
+                }
+            });
+
+            // ============================================================
+            // FIX 4: Fix "How It Works" and "Features" navigation
+            // These links should work from any page
+            // ============================================================
+            const howItWorksLink = document.querySelector('a[href$="#how-it-works"]');
+            const featuresLink = document.querySelector('a[href$="#features"]');
+
+            if (howItWorksLink) {
+                howItWorksLink.addEventListener('click', function (e) {
+                    if (window.location.pathname !== '/' && window.location.pathname !== '/index') {
+                        // Let it navigate to home with hash
+                        return true;
+                    } else {
+                        // Already on home, just scroll
+                        e.preventDefault();
+                        const target = document.getElementById('how-it-works');
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            }
+
+            if (featuresLink) {
+                featuresLink.addEventListener('click', function (e) {
+                    if (window.location.pathname !== '/' && window.location.pathname !== '/index') {
+                        // Let it navigate to home with hash
+                        return true;
+                    } else {
+                        // Already on home, just scroll
+                        e.preventDefault();
+                        const target = document.getElementById('features');
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            }
+        });
+
+        // ============================================================
+        // FIX 5: CRITICAL - Fix Browser Back/Forward Button Blank Page
+        // ============================================================
+        // When user clicks browser back button, page is loaded from cache
+        // with opacity: 0 still set from the transition, causing blank page
+        window.addEventListener('pageshow', function (event) {
+            // Reset opacity when page is shown (including from cache)
+            document.body.style.opacity = '1';
+            document.body.classList.add('loaded');
+        });
+
+        // Also handle popstate (back/forward navigation)
+        window.addEventListener('popstate', function (event) {
+            document.body.style.opacity = '1';
+            document.body.classList.add('loaded');
+        });
+
+        // ============================================================
+        // BACK TO TOP BUTTON FUNCTIONALITY
+        // ============================================================
+        const backToTopBtn = document.getElementById('backToTop');
+
+        if (backToTopBtn) {
+            // Show/hide button based on scroll position
+            let scrollTimer;
+            window.addEventListener('scroll', function () {
+                // Throttle scroll event for better performance
+                clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(function () {
+                    if (window.pageYOffset > 300) {
+                        backToTopBtn.classList.add('show');
+                    } else {
+                        backToTopBtn.classList.remove('show');
+                    }
+                }, 50);
+            });
+
+            // Smooth scroll to top on click
+            backToTopBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        // ============================================================
+        // Page Transition Effect - DISABLED to prevent back button issues
+        // Commenting out to fix blank page on browser back button
+        // ============================================================
+        /*
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                // Only apply transition to page navigations, NOT anchor links or external links
+                if (href && href.startsWith('/') && !href.includes('#') && !this.getAttribute('target')) {
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 400);
+                }
+            });
+        });
+        */
+    </script>
+
+    <!-- AskVera Chatbot Widget -->
+    {% include 'components/askvera_widget.html' %}
+    <script src="{{ url_for('static', filename='js/askvera.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

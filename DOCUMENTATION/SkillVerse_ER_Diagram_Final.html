@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillVerse ER Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .diagram-wrapper {
+            overflow-x: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .entity {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .entity:hover .entity-body {
+            fill: #b8e6bd;
+            stroke-width: 3;
+        }
+        
+        .entity:hover .entity-top {
+            fill: #9ad09f;
+        }
+        
+        .entity:hover .entity-bottom {
+            fill: #c8f0cd;
+        }
+        
+        .entity-body {
+            fill: #90c695;
+            stroke: #2d5a2f;
+            stroke-width: 2;
+        }
+        
+        .entity-top {
+            fill: #7ab57f;
+            stroke: #2d5a2f;
+            stroke-width: 2;
+        }
+        
+        .entity-bottom {
+            fill: #a8d5ad;
+            stroke: #2d5a2f;
+            stroke-width: 2;
+        }
+        
+        .entity-text {
+            fill: #1a1a1a;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .field-text {
+            fill: #333;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+        }
+        
+        .relationship {
+            fill: #f4d03f;
+            stroke: #c29d0b;
+            stroke-width: 2;
+        }
+        
+        .relationship-text {
+            fill: #1a1a1a;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .connection-line {
+            stroke: #666;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        
+        .print-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .print-btn:hover {
+            background: #764ba2;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 10px;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 SkillVerse Database ER Diagram</h1>
+        <p class="subtitle">Entity Relationship Diagram - Complete Database Structure</p>
+        
+        <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        
+        <div class="diagram-wrapper">
+            <svg width="1700" height="2000" xmlns="http://www.w3.org/2000/svg">
+                <!-- Define cylindrical entity shape -->
+                <defs>
+                    <filter id="shadow">
+                        <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+                    </filter>
+                </defs>
+                
+                <!-- USERS Entity (Center Top) -->
+                <g class="entity" transform="translate(750, 50)">
+                    <ellipse class="entity-top" cx="100" cy="0" rx="100" ry="15" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="200" height="180" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="100" cy="180" rx="100" ry="15" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="180" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="200" y1="0" x2="200" y2="180" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="100" y="25" text-anchor="middle">USERS</text>
+                    <text class="field-text" x="20" y="45">• id (PK)</text>
+                    <text class="field-text" x="20" y="60">• username</text>
+                    <text class="field-text" x="20" y="75">• email</text>
+                    <text class="field-text" x="20" y="90">• password_hash</text>
+                    <text class="field-text" x="20" y="105">• user_type</text>
+                    <text class="field-text" x="20" y="120">• full_name</text>
+                    <text class="field-text" x="20" y="135">• wallet_balance</text>
+                    <text class="field-text" x="20" y="150">• is_active</text>
+                    <text class="field-text" x="20" y="165">• created_at</text>
+                </g>
+                
+                <!-- CATEGORIES Entity (Left Top) -->
+                <g class="entity" transform="translate(50, 350)">
+                    <ellipse class="entity-top" cx="80" cy="0" rx="80" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="160" height="100" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="80" cy="100" rx="80" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="100" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="160" y1="0" x2="160" y2="100" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="80" y="20" text-anchor="middle">CATEGORIES</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• name</text>
+                    <text class="field-text" x="15" y="70">• description</text>
+                    <text class="field-text" x="15" y="85">• icon, color</text>
+                </g>
+                
+                <!-- SERVICES Entity (Center) -->
+                <g class="entity" transform="translate(400, 350)">
+                    <ellipse class="entity-top" cx="90" cy="0" rx="90" ry="13" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="180" height="140" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="90" cy="140" rx="90" ry="13" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="140" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="180" y1="0" x2="180" y2="140" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="90" y="20" text-anchor="middle">SERVICES</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• title</text>
+                    <text class="field-text" x="15" y="70">• description</text>
+                    <text class="field-text" x="15" y="85">• price</text>
+                    <text class="field-text" x="15" y="100">• user_id (FK)</text>
+                    <text class="field-text" x="15" y="115">• category_id (FK)</text>
+                    <text class="field-text" x="15" y="130">• is_approved</text>
+                </g>
+                
+                <!-- ORDERS Entity (Right Center) -->
+                <g class="entity" transform="translate(750, 350)">
+                    <ellipse class="entity-top" cx="85" cy="0" rx="85" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="170" height="150" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="85" cy="150" rx="85" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="150" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="170" y1="0" x2="170" y2="150" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="85" y="20" text-anchor="middle">ORDERS</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• service_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• buyer_id (FK)</text>
+                    <text class="field-text" x="15" y="85">• seller_id (FK)</text>
+                    <text class="field-text" x="15" y="100">• total_price</text>
+                    <text class="field-text" x="15" y="115">• status</text>
+                    <text class="field-text" x="15" y="130">• rejection_reason</text>
+                </g>
+                
+                <!-- TRANSACTIONS Entity (Right Top) -->
+                <g class="entity" transform="translate(1100, 350)">
+                    <ellipse class="entity-top" cx="90" cy="0" rx="90" ry="13" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="180" height="130" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="90" cy="130" rx="90" ry="13" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="130" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="180" y1="0" x2="180" y2="130" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="90" y="20" text-anchor="middle">TRANSACTIONS</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• txn_id</text>
+                    <text class="field-text" x="15" y="70">• user_id (FK)</text>
+                    <text class="field-text" x="15" y="85">• amount</text>
+                    <text class="field-text" x="15" y="100">• method, type</text>
+                    <text class="field-text" x="15" y="115">• status, timestamp</text>
+                </g>
+                
+                <!-- CERTIFICATES Entity (Bottom Left) -->
+                <g class="entity" transform="translate(600, 650)">
+                    <ellipse class="entity-top" cx="90" cy="0" rx="90" ry="13" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="180" height="130" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="90" cy="130" rx="90" ry="13" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="130" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="180" y1="0" x2="180" y2="130" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="90" y="20" text-anchor="middle">CERTIFICATES</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• cert_id</text>
+                    <text class="field-text" x="15" y="70">• order_id (FK)</text>
+                    <text class="field-text" x="15" y="85">• student_id (FK)</text>
+                    <text class="field-text" x="15" y="100">• provider_id (FK)</text>
+                    <text class="field-text" x="15" y="115">• skill_name</text>
+                </g>
+                
+                <!-- REVIEWS Entity (Bottom Center) -->
+                <g class="entity" transform="translate(350, 650)">
+                    <ellipse class="entity-top" cx="75" cy="0" rx="75" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="150" height="110" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="75" cy="110" rx="75" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="150" y1="0" x2="150" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="75" y="20" text-anchor="middle">REVIEWS</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• rating</text>
+                    <text class="field-text" x="15" y="70">• comment</text>
+                    <text class="field-text" x="15" y="85">• service_id (FK)</text>
+                    <text class="field-text" x="15" y="100">• user_id (FK)</text>
+                </g>
+                
+                <!-- MESSAGES Entity (Bottom Right) -->
+                <g class="entity" transform="translate(900, 650)">
+                    <ellipse class="entity-top" cx="80" cy="0" rx="80" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="160" height="110" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="80" cy="110" rx="80" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="160" y1="0" x2="160" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="80" y="20" text-anchor="middle">MESSAGES</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• order_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• sender_id (FK)</text>
+                    <text class="field-text" x="15" y="85">• content</text>
+                    <text class="field-text" x="15" y="100">• created_at</text>
+                </g>
+                
+                <!-- AVAILABILITY_SLOTS Entity (Far Right) -->
+                <g class="entity" transform="translate(1350, 650)">
+                    <ellipse class="entity-top" cx="90" cy="0" rx="90" ry="13" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="180" height="110" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="90" cy="110" rx="90" ry="13" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="180" y1="0" x2="180" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="90" y="20" text-anchor="middle">AVAILABILITY_SLOTS</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• provider_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• start_time</text>
+                    <text class="field-text" x="15" y="85">• end_time</text>
+                    <text class="field-text" x="15" y="100">• is_booked</text>
+                </g>
+                
+                <!-- BOOKINGS Entity (Far Right Bottom) -->
+                <g class="entity" transform="translate(1100, 900)">
+                    <ellipse class="entity-top" cx="80" cy="0" rx="80" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="160" height="110" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="80" cy="110" rx="80" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="160" y1="0" x2="160" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="80" y="20" text-anchor="middle">BOOKINGS</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• slot_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• client_id (FK)</text>
+                    <text class="field-text" x="15" y="85">• order_id (FK)</text>
+                    <text class="field-text" x="15" y="100">• status</text>
+                </g>
+                
+                <!-- NOTIFICATIONS Entity (Left Bottom) -->
+                <g class="entity" transform="translate(50, 900)">
+                    <ellipse class="entity-top" cx="85" cy="0" rx="85" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="170" height="110" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="85" cy="110" rx="85" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="170" y1="0" x2="170" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="85" y="20" text-anchor="middle">NOTIFICATIONS</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• user_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• title</text>
+                    <text class="field-text" x="15" y="85">• message</text>
+                    <text class="field-text" x="15" y="100">• is_read</text>
+                </g>
+                
+                <!-- FAVORITES Entity (Center Bottom) -->
+                <g class="entity" transform="translate(350, 900)">
+                    <ellipse class="entity-top" cx="75" cy="0" rx="75" ry="12" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="150" height="90" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="75" cy="90" rx="75" ry="12" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="90" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="150" y1="0" x2="150" y2="90" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="75" y="20" text-anchor="middle">FAVORITES</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• user_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• service_id (FK)</text>
+                </g>
+                
+                <!-- PROJECT_SHOWCASE Entity (Right Bottom) -->
+                <g class="entity" transform="translate(600, 900)">
+                    <ellipse class="entity-top" cx="90" cy="0" rx="90" ry="13" filter="url(#shadow)"/>
+                    <rect class="entity-body" x="0" y="0" width="180" height="110" filter="url(#shadow)"/>
+                    <ellipse class="entity-bottom" cx="90" cy="110" rx="90" ry="13" filter="url(#shadow)"/>
+                    <line x1="0" y1="0" x2="0" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <line x1="180" y1="0" x2="180" y2="110" stroke="#2d5a2f" stroke-width="2"/>
+                    <text class="entity-text" x="90" y="20" text-anchor="middle">PROJECT_SHOWCASE</text>
+                    <text class="field-text" x="15" y="40">• id (PK)</text>
+                    <text class="field-text" x="15" y="55">• user_id (FK)</text>
+                    <text class="field-text" x="15" y="70">• title</text>
+                    <text class="field-text" x="15" y="85">• description</text>
+                    <text class="field-text" x="15" y="100">• image_url</text>
+                </g>
+                
+                <!-- Relationship Diamonds and Connections -->
+                
+                <!-- USERS -> SERVICES (creates) -->
+                <path class="connection-line" d="M 850 230 L 850 280 L 550 280 L 550 350" marker-end="url(#arrowhead)"/>
+                <polygon class="relationship" points="550,300 565,315 550,330 535,315"/>
+                <text class="relationship-text" x="700" y="275">creates</text>
+                
+                <!-- CATEGORIES -> SERVICES (categorizes) -->
+                <path class="connection-line" d="M 210 400 L 400 420"/>
+                <polygon class="relationship" points="300,410 315,420 300,430 285,420"/>
+                <text class="relationship-text" x="250" y="410">categorizes</text>
+                
+                <!-- SERVICES -> ORDERS (ordered_as) -->
+                <path class="connection-line" d="M 580 420 L 750 425"/>
+                <polygon class="relationship" points="665,420 680,425 665,435 650,425"/>
+                <text class="relationship-text" x="630" y="415">ordered_as</text>
+                
+                <!-- USERS -> ORDERS (places/receives) -->
+                <path class="connection-line" d="M 850 230 L 835 350"/>
+                <polygon class="relationship" points="840,290 850,305 835,315 825,300"/>
+                <text class="relationship-text" x="860" y="290">places/receives</text>
+                
+                <!-- USERS -> TRANSACTIONS (has) -->
+                <path class="connection-line" d="M 950 200 L 1100 280 L 1190 350"/>
+                <polygon class="relationship" points="1050,240 1065,250 1055,265 1040,255"/>
+                <text class="relationship-text" x="1020" y="270">has</text>
+                
+                <!-- ORDERS -> CERTIFICATES (generates) -->
+                <path class="connection-line" d="M 800 500 L 720 650"/>
+                <polygon class="relationship" points="760,575 770,590 755,600 745,585"/>
+                <text class="relationship-text" x="780" y="580">generates</text>
+                
+                <!-- SERVICES -> REVIEWS (reviewed_in) -->
+                <path class="connection-line" d="M 470 490 L 440 650"/>
+                <polygon class="relationship" points="455,570 465,585 450,595 440,580"/>
+                <text class="relationship-text" x="480" y="580">reviewed_in</text>
+                
+                <!-- USERS -> REVIEWS (writes) -->
+                <path class="connection-line" d="M 750 230 L 500 600 L 450 650"/>
+                <polygon class="relationship" points="625,415 635,430 620,440 610,425"/>
+                <text class="relationship-text" x="640" y="450">writes</text>
+                
+                <!-- ORDERS -> MESSAGES (contains) -->
+                <path class="connection-line" d="M 870 500 L 960 650"/>
+                <polygon class="relationship" points="915,575 925,590 910,600 900,585"/>
+                <text class="relationship-text" x="930" y="580">contains</text>
+                
+                <!-- USERS -> AVAILABILITY_SLOTS (creates) -->
+                <path class="connection-line" d="M 950 200 L 1300 500 L 1420 650"/>
+                <polygon class="relationship" points="1125,350 1140,360 1130,375 1115,365"/>
+                <text class="relationship-text" x="1150" y="450">creates</text>
+                
+                <!-- AVAILABILITY_SLOTS -> BOOKINGS (booked_in) -->
+                <path class="connection-line" d="M 1400 760 L 1250 900"/>
+                <polygon class="relationship" points="1325,830 1335,845 1320,855 1310,840"/>
+                <text class="relationship-text" x="1340" y="835">booked_in</text>
+                
+                <!-- ORDERS -> BOOKINGS (has_booking) -->
+                <path class="connection-line" d="M 900 500 L 1050 800 L 1100 900"/>
+                <polygon class="relationship" points="975,650 985,665 970,675 960,660"/>
+                <text class="relationship-text" x="990" y="700">has_booking</text>
+                
+                <!-- USERS -> NOTIFICATIONS (receives) -->
+                <path class="connection-line" d="M 750 230 L 300 800 L 150 900"/>
+                <polygon class="relationship" points="525,515 535,530 520,540 510,525"/>
+                <text class="relationship-text" x="400" y="600">receives</text>
+                
+                <!-- USERS -> FAVORITES (favorites) -->
+                <path class="connection-line" d="M 800 230 L 500 800 L 440 900"/>
+                <polygon class="relationship" points="650,515 660,530 645,540 635,525"/>
+                <text class="relationship-text" x="600" y="650">favorites</text>
+                
+                <!-- SERVICES -> FAVORITES (favorited) -->
+                <path class="connection-line" d="M 470 490 L 430 900"/>
+                <polygon class="relationship" points="450,695 460,710 445,720 435,705"/>
+                <text class="relationship-text" x="470" y="700">favorited</text>
+                
+                <!-- USERS -> PROJECT_SHOWCASE (showcases) -->
+                <path class="connection-line" d="M 820 230 L 700 800 L 690 900"/>
+                <polygon class="relationship" points="760,515 770,530 755,540 745,525"/>
+                <text class="relationship-text" x="780" y="650">showcases</text>
+                
+                <!-- Arrow marker definition -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                        <polygon points="0 0, 10 5, 0 10" fill="#666"/>
+                    </marker>
+                </defs>
+                
+            </svg>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #667eea;">
+            <h3 style="color: #667eea; margin-bottom: 10px;">📊 Database Summary</h3>
+            <p style="color: #555; line-height: 1.6;">
+                <strong>Total Tables:</strong> 13 entities<br>
+                <strong>Relationships:</strong> 17 connections<br>
+                <strong>Key Features:</strong> User management, Service marketplace, Order processing, Payment system, 
+                Certificate generation, Real-time messaging, Booking system, Reviews & ratings
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Add interactivity
+        document.querySelectorAll('.entity').forEach(entity => {
+            entity.addEventListener('click', function() {
+                const text = this.querySelector('.entity-text').textContent;
+                alert('Entity: ' + text + '\n\nClick Print button to save as PDF');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modern_dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-avatar" style="background: linear-gradient(135deg, #DC2626, #F59E0B);">
+                <i class="bi bi-shield-check"></i>
+            </div>
+
+            <h1 class="hero-title">Admin Control Center</h1>
+            <p class="hero-subtitle">Platform Management & Analytics</p>
+        </div>
+    </div>
+
+    <!-- Bento Grid -->
+    <div class="bento-grid">
+
+        <!-- Card 1: Total Users -->
+        <a href="{{ url_for('admin.users') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-blue"><i class="bi bi-people-fill"></i></div>
+                <span class="trend-pill trend-positive">Active</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_users if stats else 0 }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </a>
+
+        <!-- Card 2: Total Services -->
+        <a href="{{ url_for('admin.services') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-emerald"><i class="bi bi-briefcase-fill"></i></div>
+                <span class="trend-pill trend-positive">Live</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_services if stats else 0 }}</div>
+                <div class="stat-label">Total Services</div>
+            </div>
+        </a>
+
+        <!-- Card 3: Total Orders -->
+        <a href="{{ url_for('admin.orders') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-amber"><i class="bi bi-cart-fill"></i></div>
+                <span class="trend-pill trend-neutral">All Time</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_orders if stats else 0 }}</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+        </a>
+
+        <!-- Card 4: Total Reviews -->
+        <a href="{{ url_for('admin.services') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-violet"><i class="bi bi-star-fill"></i></div>
+                <span class="trend-pill trend-neutral">Reviews</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_reviews if stats else 0 }}</div>
+                <div class="stat-label">Total Reviews</div>
+            </div>
+        </a>
+
+        <!-- Card 5: Pending Approvals -->
+        <a href="{{ url_for('admin.pending_services') }}" class="bento-card"
+            style="{% if pending_services_count > 0 %}border: 2px solid #F59E0B; box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);{% endif %}">
+            <div class="card-header-row">
+                <div class="icon-box" style="background: linear-gradient(135deg, #F59E0B, #D97706);"><i
+                        class="bi bi-clock-history"></i></div>
+                {% if pending_services_count > 0 %}
+                <span class="trend-pill" style="background: #FEF3C7; color: #D97706;">Action Needed</span>
+                {% else %}
+                <span class="trend-pill trend-positive">All Clear</span>
+                {% endif %}
+            </div>
+            <div>
+                <div class="stat-value">{{ pending_services_count }}</div>
+                <div class="stat-label">Pending Approvals</div>
+            </div>
+        </a>
+
+        <!-- Row 2: Quick Actions Panel -->
+        <div class="panel span-4">
+            <div class="panel-header">
+                <span class="panel-title">Quick Actions</span>
+                <i class="bi bi-lightning-charge text-muted"></i>
+            </div>
+            <div style="padding: 1.75rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <a href="{{ url_for('admin.users') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-people"></i>Manage Users
+                    </a>
+                    <a href="{{ url_for('admin.services') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-briefcase"></i>Manage Services
+                    </a>
+                    <a href="{{ url_for('admin.categories') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-grid"></i>Categories
+                    </a>
+                    <a href="{{ url_for('admin.orders') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-cart"></i>View Orders
+                    </a>
+                    <a href="{{ url_for('admin.bookings') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-calendar-check"></i>Bookings
+                    </a>
+                    <a href="{{ url_for('admin.availability') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-calendar-range"></i>Availability
+                    </a>
+                    <a href="{{ url_for('admin.pending_services') }}" class="btn-action"
+                        style="justify-content: center;{% if pending_services_count > 0 %} color: #D97706; font-weight: 700;{% endif %}">
+                        <i class="bi bi-check-circle"></i>Approve Services{% if pending_services_count > 0 %} ({{
+                        pending_services_count }}){% endif %}
+                    </a>
+                    <a href="{{ url_for('admin.messages') }}" class="btn-action" style="justify-content: center;">
+                        <i class="bi bi-envelope"></i>Messages
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Analytics - User Growth -->
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">User Growth Trend</span>
+                <i class="bi bi-graph-up text-muted"></i>
+            </div>
+            <div class="graph-wrapper">
+                {% if user_graph %}
+                <img src="data:image/png;base64,{{ user_graph }}" class="graph-img" alt="User Growth">
+                {% else %}
+                <span class="text-secondary small">No user data available.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 3: Analytics - Category Distribution -->
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Top Categories</span>
+                <i class="bi bi-bar-chart text-muted"></i>
+            </div>
+            <div class="graph-wrapper">
+                {% if category_graph %}
+                <img src="data:image/png;base64,{{ category_graph }}" class="graph-img" alt="Categories">
+                {% else %}
+                <span class="text-secondary small">No category data available.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 4: Recent Users Table -->
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Recent Users</span>
+                <a href="{{ url_for('admin.users') }}" class="btn-action">View All</a>
+            </div>
+            <div style="overflow-x: auto;">
+                {% if recent_users %}
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users|default([]) %}
+                        {% if loop.index <= 5 %} <tr style="cursor:pointer;"
+                            onclick="window.location.href='{{ url_for('user.profile', username=user.username) }}'">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ user.get_avatar_url() }}" width="32" height="32" class="rounded-circle"
+                                        onerror="this.src='https://via.placeholder.com/32?text=U'">
+                                    <div>
+                                        <div style="font-weight:600;">{{ user.username }}</div>
+                                        <div class="text-secondary small">{{ user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span
+                                    class="status {{ 'status-completed' if user.user_type == 'provider' else 'status-active' }}">
+                                    {{ user.user_type }}
+                                </span>
+                            </td>
+                            <td class="text-secondary">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                <span class="status {{ 'status-completed' if user.is_active else 'status-pending' }}">
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-secondary">No users found.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 4: Recent Services Table -->
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Recent Services</span>
+                <a href="{{ url_for('admin.services') }}" class="btn-action">View All</a>
+            </div>
+            <div style="overflow-x: auto;">
+                {% if recent_services %}
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Provider</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in recent_services|default([]) %}
+                        {% if loop.index <= 5 %} <tr style="cursor:pointer;"
+                            onclick="window.location.href='{{ url_for('service.detail', service_id=service.id) }}'">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-box icon-emerald" style="width:32px; height:32px; font-size:1rem;">
+                                        <i class="bi bi-briefcase"></i>
+                                    </div>
+                                    <span style="font-weight:600;">{{ service.title[:40] }}{% if service.title|length >
+                                        40 %}...{% endif %}</span>
+                                </div>
+                            </td>
+                            <td class="text-secondary">{{ service.provider.username }}</td>
+                            <td style="font-weight:700;">₹{{ "%.0f"|format(service.price|default(0)) }}</td>
+                            <td>
+                                {% if service.is_approved %}
+                                <span class="status status-completed">Approved</span>
+                                {% elif service.rejection_reason %}
+                                <span class="status status-pending"
+                                    style="background: #FEE2E2; color: #DC2626;">Rejected</span>
+                                {% else %}
+                                <span class="status status-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-secondary">No services found.</div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

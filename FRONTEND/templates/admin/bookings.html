@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Bookings - Admin{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="fw-bold">Manage Bookings</h2>
+                <p class="text-muted">View all calendar bookings in the system</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Service/Order</th>
+                                <th>Client</th>
+                                <th>Provider</th>
+                                <th>Slot Time (UTC)</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td>#{{ booking.id }}</td>
+                                <td>
+                                    {% if booking.service %}
+                                        <a href="{{ url_for('service.detail', service_id=booking.service.id) }}" class="text-decoration-none">
+                                            {{ booking.service.title[:30] }}...
+                                        </a>
+                                    {% elif booking.order_id %}
+                                        <span class="text-muted">Order #{{ booking.order_id }}</span>
+                                    {% else %}
+                                        <span class="text-muted">General Booking</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ booking.client.get_avatar_url() }}" class="rounded-circle me-2" width="24" height="24">
+                                        {{ booking.client.username }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ booking.slot.provider.get_avatar_url() }}" class="rounded-circle me-2" width="24" height="24">
+                                        {{ booking.slot.provider.username }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-medium">{{ booking.slot.start_time.strftime('%Y-%m-%d %H:%M') }}</div>
+                                    <small class="text-muted">{{ booking.slot.end_time.strftime('%H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if booking.status == 'confirmed' %}success{% elif booking.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                        {{ booking.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if booking.notes %}
+                                        <span class="d-inline-block text-truncate" style="max-width: 150px;" title="{{ booking.notes }}">
+                                            {{ booking.notes }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">{{ booking.created_at.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+                    <p>No bookings found in the system</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

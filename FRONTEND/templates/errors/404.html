@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}404 - Page Not Found{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 d-flex align-items-center position-relative overflow-hidden bg-light"
+    style="margin-top: 60px;">
+    <!-- Abstract Orbs -->
+    <div class="orb-1" style="top: 20%; left: 20%; filter: blur(80px); opacity: 0.5;"></div>
+    <div class="orb-2" style="bottom: 20%; right: 20%; filter: blur(100px); opacity: 0.5;"></div>
+
+    <div class="container position-relative fade-in-up">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <div class="card border-0 shadow-lg rounded-5 bg-white bg-opacity-50 backdrop-blur">
+                    <div class="card-body p-5">
+                        <div class="display-1 fw-bold text-gradient mb-3">404</div>
+                        <h2 class="fw-bold mb-3">Page Not Found</h2>
+                        <p class="text-muted mb-4 lead">Oops! It seems you've ventured into the unknown. The page you're
+                            looking for doesn't exist.</p>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('main.index') }}"
+                                class="btn btn-primary rounded-pill px-4 py-2 btn-sweep shadow-sm fw-bold">
+                                <i class="bi bi-house me-2"></i>Go Home
+                            </a>
+                            <a href="javascript:history.back()"
+                                class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-medium">
+                                Go Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

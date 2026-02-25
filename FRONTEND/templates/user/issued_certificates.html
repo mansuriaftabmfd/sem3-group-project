@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Issued Certificates | SkillVerse{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold mb-1">📜 Issued Certificates</h2>
+            <p class="text-secondary">Track the achievements you've granted to your students</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div
+                class="badge bg-success-soft text-success rounded-pill px-4 py-2 border border-success border-opacity-25">
+                <i class="bi bi-check-circle-fill me-2"></i>Total Issued: {{ certificates|length }}
+            </div>
+        </div>
+    </div>
+
+    <div class="workroom-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 border-0">Certificate ID</th>
+                        <th class="py-3 border-0">Student</th>
+                        {% if current_user.is_admin() %}
+                        <th class="py-3 border-0">Issued By</th>
+                        {% endif %}
+                        <th class="py-3 border-0">Skill / Course</th>
+                        <th class="py-3 border-0">Date Issued</th>
+                        <th class="py-3 border-0 text-center">Order</th>
+                        <th class="pe-4 py-3 border-0 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% if certificates %}
+                    {% for cert in certificates %}
+                    <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold text-primary">{{ cert.cert_id }}</span>
+                                <button onclick="copyCertId(this)" data-cert-id="{{ cert.cert_id }}"
+                                    class="btn btn-sm p-0 border-0 text-muted copy-cert-btn"
+                                    title="Copy Certificate ID" style="line-height:1; opacity:0.5;">
+                                    <i class="bi bi-copy"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-2">
+                                    <img src="{{ cert.student.get_avatar_url() }}" class="rounded-circle"
+                                        style="width: 32px; height: 32px; object-fit: cover;">
+                                </div>
+                                <span>{{ cert.student.full_name or cert.student.username }}</span>
+                            </div>
+                        </td>
+                        {% if current_user.is_admin() %}
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-2">
+                                    <img src="{{ cert.provider.get_avatar_url() }}" class="rounded-circle"
+                                        style="width: 32px; height: 32px; object-fit: cover;">
+                                </div>
+                                <span class="small">{{ cert.provider.full_name or cert.provider.username }}</span>
+                            </div>
+                        </td>
+                        {% endif %}
+                        <td>
+                            <span class="fw-medium">{{ cert.skill_name }}</span>
+                        </td>
+                        <td>
+                            <span class="text-secondary small">{{ cert.issued_at.strftime('%B %d, %Y') }}</span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('user.order_detail', order_id=cert.order_id) }}"
+                                class="text-decoration-none">
+                                #{{ cert.order_id }}
+                            </a>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <div class="btn-group">
+                                <a href="{{ url_for('user.download_certificate', cert_id=cert.cert_id) }}"
+                                    class="btn btn-sm btn-outline-primary" title="Download">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                <a href="{{ url_for('main.verify_certificate_prefilled', cert_id=cert.cert_id) }}"
+                                    class="btn btn-sm btn-outline-info" title="Verify Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="{% if current_user.is_admin() %}7{% else %}6{% endif %}" class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="bi bi-journal-check text-secondary opacity-25" style="font-size: 4rem;"></i>
+                            </div>
+                            <h5 class="fw-bold">No certificates issued yet</h5>
+                            <p class="text-secondary">Complete student orders to start issuing certificates
+                                automatically.</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<style>
+    .copy-cert-btn { transition: opacity 0.2s, transform 0.15s; cursor: pointer; }
+    .copy-cert-btn:hover { opacity: 1 !important; transform: scale(1.2); color: #4f46e5 !important; }
+    .copy-cert-btn:active { transform: scale(0.9); }
+</style>
+<script>
+    function copyCertId(btn) {
+        const certId = btn.getAttribute('data-cert-id');
+        navigator.clipboard.writeText(certId).then(() => {
+            const icon = btn.querySelector('i');
+            icon.className = 'bi bi-check-lg text-success';
+            btn.style.opacity = '1';
+            btn.title = 'Copied!';
+            setTimeout(() => {
+                icon.className = 'bi bi-copy';
+                btn.style.opacity = '0.5';
+                btn.title = 'Copy Certificate ID';
+            }, 2000);
+        }).catch(() => {
+            const el = document.createElement('textarea');
+            el.value = certId;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+        });
+    }
+</script>
+{% endblock %}

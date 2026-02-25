@@ -1,0 +1,129 @@
+<!-- 
+    Footer Component
+    
+    Features:
+    - Newsletter signup
+    - Navigation links (Platform, Support, Company, Legal)
+    - Social media links
+    - Copyright info
+-->
+<footer class="footer bg-dark text-white pt-5 pb-3 mt-auto">
+    <div class="container">
+        <!-- Main Footer Content -->
+        <div class="row g-4 mb-5">
+            <!-- Brand Column -->
+            <div class="col-lg-4 col-md-6">
+                <a class="navbar-brand d-flex align-items-center mb-4" href="{{ url_for('main.index') }}">
+                    <div
+                        class="logo-box d-flex align-items-center justify-content-center text-white rounded-3 shadow-sm me-2">
+                        S
+                    </div>
+                    <span class="fw-bold h4 m-0 text-white">Skill<span class="text-gradient">Verse</span></span>
+                </a>
+                <p class="text-white-50 mb-4">
+                    Connecting skills with opportunities. Build your career, find talent, join communities.
+                </p>
+                <!-- Social Links -->
+                <div class="d-flex gap-3">
+                    <a href="https://www.facebook.com/profile.php?id=61587065567090" target="_blank"
+                        class="social-icon-btn rounded-circle btn-outline-light">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/skillverse-web-9913193aa" target="_blank"
+                        class="social-icon-btn rounded-circle btn-outline-light">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="https://www.instagram.com/skillverse_web" target="_blank"
+                        class="social-icon-btn rounded-circle btn-outline-light">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="https://github.com/SKILLVERSE-web" target="_blank"
+                        class="social-icon-btn rounded-circle btn-outline-light">
+                        <i class="bi bi-github"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Links Columns -->
+            <div class="col-lg-2 col-md-6">
+                <h5 class="fw-bold mb-4 text-white">Platform</h5>
+                <ul class="list-unstyled footer-links">
+                    <li class="mb-2"><a href="{{ url_for('service.browse') }}"
+                            class="text-white-50 text-decoration-none">Browse Skills</a></li>
+
+                    <li class="mb-2"><a href="{{ url_for('main.index') }}#how-it-works"
+                            class="text-white-50 text-decoration-none">How It Works</a></li>
+
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <h5 class="fw-bold mb-4 text-white">Support</h5>
+                <ul class="list-unstyled footer-links">
+
+                    <li class="mb-2"><a href="{{ url_for('main.contact') }}"
+                            class="text-white-50 text-decoration-none">Contact Us</a></li>
+                    <li class="mb-2"><a href="{{ url_for('main.index') }}#faq"
+                            class="text-white-50 text-decoration-none">FAQs</a></li>
+                    <li class="mb-2"><a href="{{ url_for('main.verify_certificate_page') }}"
+                            class="text-white-50 text-decoration-none">
+                            <i class="bi bi-patch-check-fill text-warning me-1" style="font-size:0.75rem;"></i>
+                            Verify Certificate</a></li>
+
+
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <h5 class="fw-bold mb-4 text-white">Company</h5>
+                <ul class="list-unstyled footer-links">
+                    <li class="mb-2"><a href="{{ url_for('main.about') }}"
+                            class="text-white-50 text-decoration-none">About Us</a></li>
+
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <h5 class="fw-bold mb-4 text-white">Legal</h5>
+                <ul class="list-unstyled footer-links">
+                    <li class="mb-2"><a href="{{ url_for('main.terms') }}"
+                            class="text-white-50 text-decoration-none">Terms of Service</a></li>
+                    <li class="mb-2"><a href="{{ url_for('main.privacy') }}"
+                            class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+
+                </ul>
+            </div>
+        </div>
+
+
+
+        <!-- Copyright -->
+        <div class="text-center pt-4 border-top border-secondary">
+            <p class="text-white-50 small mb-0">&copy; 2026 SkillVerse. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .social-icon-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .social-icon-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: white;
+    }
+
+    .footer-links a:hover {
+        color: white !important;
+    }
+</style>

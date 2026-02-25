@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms of Service - SkillVerse{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div
+                    class="card-header bg-gradient-primary text-white p-5 text-center position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10"
+                        style="background: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+                    <h1 class="fw-bold mb-2 position-relative z-1">Terms of Service</h1>
+                    <p class="lead mb-0 opacity-75 position-relative z-1">Last updated: February 2, 2026</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="legal-content">
+                        <section class="mb-5">
+                            <h3 class="fw-bold text-primary mb-3">1. Introduction</h3>
+                            <p class="text-muted">Welcome to SkillVerse. By accessing our website and using our
+                                services, you agree to comply with and be bound by the following terms and conditions.
+                                Please read them carefully.</p>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="fw-bold text-primary mb-3">2. User Accounts</h3>
+                            <div class="d-flex gap-3 mb-3">
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center"
+                                    style="width: 50px; height: 50px;">
+                                    <i class="bi bi-person-check text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold">Registration</h5>
+                                    <p class="text-muted mb-0">You must register an account to access certain features.
+                                        You agree to provide accurate and complete information.</p>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center"
+                                    style="width: 50px; height: 50px;">
+                                    <i class="bi bi-shield-lock text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold">Security</h5>
+                                    <p class="text-muted mb-0">You are responsible for maintaining the confidentiality
+                                        of your account credentials and for all activities that occur under your
+                                        account.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="fw-bold text-primary mb-3">3. Services & Payments</h3>
+                            <p class="text-muted">SkillVerse provides a platform for connecting professionals with
+                                clients. We facilitate payments but are not a party to the direct contracts between
+                                users.</p>
+                            <ul class="list-unstyled mt-3">
+                                <li class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
+                                    <span class="text-muted">All payments are held securely in escrow until the service
+                                        is completed.</span>
+                                </li>
+                                <li class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
+                                    <span class="text-muted">Service fees are non-refundable once the order is in
+                                        progress.</span>
+                                </li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="fw-bold text-primary mb-3">4. Content & Conduct</h3>
+                            <p class="text-muted">Users must maintain professional conduct. Harassment, hate speech, or
+                                sharing prohibited content will result in immediate account suspension.</p>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="fw-bold text-primary mb-3">5. Disclaimer</h3>
+                            <p class="text-muted">SkillVerse is provided "as is" without warranties of any kind. We are
+                                not liable for any disputes associated with user-generated content or services.</p>
+                        </section>
+
+                        <div class="alert alert-light border-start border-4 border-primary rounded-end-3 p-4">
+                            <h5 class="fw-bold mb-2"><i class="bi bi-envelope-exclamation me-2"></i>Questions?</h5>
+                            <p class="text-muted mb-0">If you have any questions about these Terms, please contact us at
+                                <a href="mailto:support@skillverse.com"
+                                    class="text-primary fw-bold text-decoration-none">support@skillverse.com</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

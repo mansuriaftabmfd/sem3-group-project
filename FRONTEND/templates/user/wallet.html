@@ -1,0 +1,1771 @@
+{% extends 'base.html' %}
+
+{% block title %}My Wallet - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ========================================================================
+       WALLET PAGE - PREMIUM UI DESIGN
+       Matching SkillVerse Theme with Beautiful Glassmorphism
+       ======================================================================== */
+
+    /* Page-specific overrides using theme variables */
+    .wallet-page {
+        min-height: 100vh;
+        background: var(--background-color);
+    }
+
+    /* Hero Section with Animated Gradient */
+    .wallet-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, #ec4899 100%);
+        padding: 80px 0 120px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .wallet-hero::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .wallet-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -150px;
+        left: -50px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Glassmorphism Balance Card */
+    .balance-card {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        padding: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        color: white;
+        text-align: center;
+        margin-bottom: -60px;
+        position: relative;
+        z-index: 20;
+    }
+
+    .balance-label {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .balance-amount {
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .balance-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-top: 5px;
+    }
+
+    /* Action Buttons */
+    .wallet-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 14px 28px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .action-btn-primary {
+        background: white;
+        color: var(--primary-color);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .action-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        color: var(--primary-color);
+    }
+
+    .action-btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .action-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* Stats Grid */
+    .stats-section {
+        padding: 100px 0 40px;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 28px;
+        border: 1px solid var(--border-color);
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px -10px var(--card-shadow);
+        border-color: var(--primary-color);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 1.5rem;
+    }
+
+    .stat-icon.credit {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+        color: var(--success-color);
+    }
+
+    .stat-icon.debit {
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
+        color: var(--accent-color);
+    }
+
+    .stat-icon.count {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+        color: var(--primary-color);
+    }
+
+    .stat-icon.rate {
+        background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.05));
+        color: #ec4899;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--foreground-color);
+        margin-bottom: 4px;
+        letter-spacing: -0.02em;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--muted-color);
+        font-weight: 500;
+    }
+
+    /* Section Header */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--foreground-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .section-title-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 24px;
+    }
+
+    .filter-card .form-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--muted-color);
+        margin-bottom: 8px;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        background: var(--background-color);
+        transition: all 0.2s ease;
+    }
+
+    .filter-card .form-control:focus,
+    .filter-card .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+
+    /* Transaction Table */
+    .table-container {
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .table thead th {
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px 20px;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(139, 92, 246, 0.05);
+    }
+
+    .table tbody td {
+        padding: 18px 20px;
+        vertical-align: middle;
+        border-color: var(--border-color);
+        color: var(--foreground-color);
+    }
+
+    .txn-id {
+        font-family: 'SF Mono', 'Monaco', monospace;
+        font-size: 0.85rem;
+        color: var(--muted-color);
+    }
+
+    .txn-description {
+        font-weight: 600;
+        color: var(--foreground-color);
+    }
+
+    .txn-amount {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .txn-amount.credit {
+        color: var(--success-color);
+    }
+
+    .txn-amount.debit {
+        color: var(--accent-color);
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.success {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success-color);
+    }
+
+    .status-badge.failed {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .txn-date {
+        font-size: 0.9rem;
+        color: var(--muted-color);
+    }
+
+    .btn-download {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--primary-color);
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-download:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .empty-state-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+
+    .empty-state h4 {
+        font-weight: 700;
+        color: var(--foreground-color);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--muted-color);
+        margin: 0;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        background: var(--card-bg);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--border-color);
+        padding: 20px 24px;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        color: var(--foreground-color);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    /* Quick Amount Buttons */
+    .quick-amount-btn {
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        border: 2px solid var(--border-color);
+        background: transparent;
+        color: var(--foreground-color);
+        transition: all 0.2s ease;
+    }
+
+    .quick-amount-btn:hover,
+    .quick-amount-btn.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-color: transparent;
+        color: white;
+        transform: scale(1.02);
+    }
+
+    /* Payment Method Toggle */
+    .payment-method-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .payment-method-btn {
+        padding: 16px;
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        background: transparent;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .payment-method-btn:hover {
+        border-color: var(--primary-color);
+    }
+
+    .btn-check:checked+.payment-method-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-color: transparent;
+        color: white;
+    }
+
+    .payment-method-btn i {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .balance-amount {
+            font-size: 2.5rem;
+        }
+
+        .balance-card {
+            padding: 28px;
+            margin-bottom: -40px;
+        }
+
+        .wallet-hero {
+            padding: 60px 0 100px;
+        }
+
+        .stats-section {
+            padding: 80px 0 40px;
+        }
+
+        .stat-card {
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 12px 14px;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Wallet Hero Section -->
+<section class="wallet-hero">
+    <div class="container hero-content">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="balance-card">
+                    <p class="balance-label">Available Balance</p>
+                    <h1 class="balance-amount" id="wallet-balance">₹{{ "%.2f"|format(wallet_balance|default(0)) }}</h1>
+                    <p class="balance-subtitle">Last updated just now</p>
+                    <div class="wallet-actions">
+                        {% if current_user.user_type != 'admin' %}
+                        <button class="action-btn action-btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addMoneyModal">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Add Money
+                        </button>
+                        {% endif %}
+                        <a href="{{ url_for('user.transactions') }}" class="action-btn action-btn-secondary">
+                            <i class="bi bi-clock-history"></i>
+                            Transaction History
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon credit">
+                        <i class="bi bi-arrow-down-circle-fill"></i>
+                    </div>
+                    <div class="stat-value" id="total-credited">₹0</div>
+                    <p class="stat-label">Total Credited</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon debit">
+                        <i class="bi bi-arrow-up-circle-fill"></i>
+                    </div>
+                    <div class="stat-value" id="total-debited">₹0</div>
+                    <p class="stat-label">Total Debited</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon count">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div class="stat-value" id="total-transactions">0</div>
+                    <p class="stat-label">Transactions</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon rate">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="stat-value" id="success-rate">0%</div>
+                    <p class="stat-label">Success Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Transaction History Section -->
+<section class="py-5" id="transaction-history">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="section-title-icon"><i class="bi bi-clock-history"></i></span>
+                Recent Transactions
+            </h2>
+            <button class="btn btn-outline-primary" id="export-csv-btn">
+                <i class="bi bi-download me-2"></i>Export CSV
+            </button>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="filter-card">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="filter-start-date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="filter-end-date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="filter-status">
+                        <option value="">All Status</option>
+                        <option value="success">Success</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" id="apply-filters">
+                        <i class="bi bi-funnel-fill me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table" id="txn-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txn-table-body">
+                        <!-- Rows populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h4>No Transactions Yet</h4>
+            <p>Add money to your wallet to see transactions here</p>
+        </div>
+    </div>
+</section>
+
+<!-- Add Money Modal (FSD Unit-7: Forms) -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-wallet2 me-2 text-primary"></i>
+                    Add Money to Wallet
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Quick Amount Buttons -->
+                <div class="mb-4">
+                    <label class="form-label">Quick Add</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-primary quick-amount-btn" data-amount="100">₹100</button>
+                        <button class="btn btn-outline-primary quick-amount-btn" data-amount="250">₹250</button>
+                        <button class="btn btn-outline-primary quick-amount-btn" data-amount="500">₹500</button>
+                        <button class="btn btn-outline-primary quick-amount-btn" data-amount="1000">₹1000</button>
+                        <button class="btn btn-outline-primary quick-amount-btn" data-amount="2000">₹2000</button>
+                    </div>
+                </div>
+
+                <form id="add-money-form">
+                    <div class="mb-3">
+                        <label class="form-label">Amount (₹)</label>
+                        <input type="number" class="form-control form-control-lg" id="add-amount" min="1" max="50000"
+                            required placeholder="Enter amount">
+                        <div class="invalid-feedback">Please enter a valid amount (₹1 - ₹50,000)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="payment-method" id="method-card"
+                                    value="card" checked>
+                                <label class="btn btn-outline-primary w-100" for="method-card">
+                                    <i class="bi bi-credit-card-fill me-2"></i>Card
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="payment-method" id="method-upi" value="upi">
+                                <label class="btn btn-outline-primary w-100" for="method-upi">
+                                    <i class="bi bi-phone-fill me-2"></i>UPI
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary w-100 btn-lg" id="proceed-to-payment">
+                        <i class="bi bi-arrow-right me-2"></i>Proceed to Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Gateway Modal -->
+<div class="modal fade" id="paymentGatewayModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    Secure Payment Gateway
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Payment Amount Display -->
+                <div class="text-center mb-4 p-3"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;">
+                    <p class="mb-1 opacity-75">Amount to Pay</p>
+                    <h2 class="mb-0" id="payment-amount-display">₹0</h2>
+                </div>
+
+                <!-- Card Payment Form -->
+                <form id="payment-form-card">
+                    <div class="mb-3">
+                        <label class="form-label">Card Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                            <input type="text" class="form-control form-control-lg" id="card-number"
+                                placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+                        <div class="invalid-feedback">Please enter a valid 16-digit card number</div>
+                        <small class="text-muted">Test: Use any 16 digits (e.g., 4111 1111 1111 1111)</small>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" id="card-name" placeholder="JOHN DOE" required>
+                            <div class="invalid-feedback">Please enter cardholder name</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="text" class="form-control" id="card-expiry" placeholder="MM/YY" maxlength="5"
+                                required>
+                            <div class="invalid-feedback">Invalid expiry</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">CVV</label>
+                            <input type="password" class="form-control" id="card-cvv" placeholder="•••" maxlength="3"
+                                required>
+                            <div class="invalid-feedback">3 digits required</div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="save-card">
+                        <label class="form-check-label" for="save-card">
+                            Save card for future payments
+                        </label>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button type="submit" class="btn btn-success w-100 btn-lg" id="pay-now-btn-card">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        <span id="pay-btn-text-card">Pay Now</span>
+                        <span class="spinner-border spinner-border-sm ms-2 d-none" id="pay-spinner-card"></span>
+                    </button>
+                </form>
+
+                <!-- UPI Payment Form -->
+                <form id="payment-form-upi" style="display: none;">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                            style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-phone-fill text-white" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="fw-bold">Pay using UPI</h5>
+                        <p class="text-muted small">Enter your UPI ID to complete the payment</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">UPI ID</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text"><i class="bi bi-at"></i></span>
+                            <input type="text" class="form-control" id="upi-id" placeholder="yourname@paytm" required>
+                        </div>
+                        <div class="invalid-feedback" id="upi-error">Please enter a valid UPI ID (e.g., name@upi,
+                            name@paytm)</div>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Examples: yourname@paytm, yourname@ybl, yourname@okaxis, 9876543210@upi
+                        </small>
+                    </div>
+
+
+
+                    <hr class="my-4">
+
+                    <button type="submit" class="btn btn-success w-100 btn-lg" id="pay-now-btn-upi">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <span id="pay-btn-text-upi">Verify & Pay</span>
+                        <span class="spinner-border spinner-border-sm ms-2 d-none" id="pay-spinner-upi"></span>
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Your payment is secured with 256-bit encryption
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Result Modal -->
+<div class="modal fade" id="paymentResultModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div id="result-icon" class="mb-4"></div>
+                <h3 id="result-title" class="mb-3"></h3>
+                <p id="result-message" class="text-muted mb-4"></p>
+                <p id="result-txn-id" class="small text-muted"></p>
+                <div id="result-buttons" class="d-flex gap-2 justify-content-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /**
+     * ========================================================================
+     * WALLET PAGE JAVASCRIPT
+     * ========================================================================
+     * 
+     * SYLLABUS UNITS COVERED:
+     * - Unit-9: DOM Manipulation, Event Handling
+     * - Unit-10: Form Validation, LocalStorage, Regex
+     * 
+     * Features:
+     * - Form validation with regex
+     * - LocalStorage for transactions
+     * - Dynamic table updates
+     * - CSV export functionality
+     * - Invoice generation
+     */
+
+    // ============================================================================
+    // GLOBAL VARIABLES
+    // ============================================================================
+    let currentPaymentAmount = 0;
+    let currentPaymentMethod = 'card';
+    const USER_ID = '{{ current_user.id if current_user else "guest" }}';
+
+    // ============================================================================
+    // SERVER-BASED DATA FUNCTIONS (Backend as Single Source of Truth)
+    // ============================================================================
+
+    // Server-provided balance (from Flask/Python - wallets.txt)
+    const SERVER_WALLET_BALANCE = {{ wallet_balance|default (0) }};
+
+    // Server-provided transactions (from Flask/Python - transactions.txt)
+    const SERVER_TRANSACTIONS = {{ transactions| tojson | safe if transactions else '[]' }};
+
+    /**
+     * Get all transactions from SERVER (passed by Flask)
+     * No longer uses localStorage - backend is source of truth
+     */
+    function getTransactionsFromStorage() {
+        // Return server-provided transactions
+        return SERVER_TRANSACTIONS || [];
+    }
+
+    /**
+     * Save transactions to storage - NO-OP since backend handles this
+     * Transactions are saved on server via API calls
+     */
+    function saveTransactionsToStorage(transactions) {
+        // No longer needed - backend saves transactions automatically
+        console.log('Transactions saved on backend via API');
+    }
+
+    /**
+     * Add a new transaction - updates local array for display
+     * The actual save happens on the backend via API call
+     */
+    function addTransaction(txn) {
+        // Add to the local array for immediate display
+        SERVER_TRANSACTIONS.unshift(txn);
+        return txn;
+    }
+
+    /**
+     * Get wallet balance from SERVER
+     * Backend (wallets.txt) is the single source of truth
+     */
+    function getWalletBalance() {
+        return SERVER_WALLET_BALANCE;
+    }
+
+    /**
+     * Update wallet balance display
+     * The actual balance update happens on backend via API
+     */
+    function updateWalletBalance(newBalance) {
+        // Update the display
+        document.getElementById('wallet-balance').textContent = `₹${parseFloat(newBalance).toFixed(2)}`;
+    }
+
+    // ============================================================================
+    // FORM VALIDATION FUNCTIONS (Unit-10: Regex)
+    // ============================================================================
+
+    /**
+     * Validate credit card number using regex
+     * Regex (Unit-10): Pattern matching for validation
+     */
+    function validateCardNumber(cardNumber) {
+        // Remove spaces
+        const cleaned = cardNumber.replace(/\s/g, '');
+        // Regex: Exactly 16 digits
+        const regex = /^[0-9]{16}$/;
+        return regex.test(cleaned);
+    }
+
+    /**
+     * Validate CVV using regex
+     */
+    function validateCVV(cvv) {
+        // Regex: Exactly 3 digits
+        const regex = /^[0-9]{3}$/;
+        return regex.test(cvv);
+    }
+
+    /**
+     * Validate expiry date using regex
+     */
+    function validateExpiryDate(expiry) {
+        // Regex: MM/YY format
+        const regex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+        if (!regex.test(expiry)) return false;
+
+        const [month, year] = expiry.split('/');
+        const expMonth = parseInt(month, 10);
+        const expYear = parseInt(year, 10) + 2000;
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+
+        // Check if card has expired
+        if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate cardholder name
+     */
+    function validateCardName(name) {
+        // Regex: Only letters and spaces, at least 2 characters
+        const regex = /^[a-zA-Z\s]{2,}$/;
+        return regex.test(name.trim());
+    }
+
+    /**
+     * Format card number with spaces
+     */
+    function formatCardNumber(value) {
+        const cleaned = value.replace(/\s/g, '').replace(/\D/g, '');
+        const groups = cleaned.match(/.{1,4}/g);
+        return groups ? groups.join(' ') : '';
+    }
+
+    /**
+     * Format expiry date with slash
+     */
+    function formatExpiryDate(value) {
+        const cleaned = value.replace(/\D/g, '');
+        if (cleaned.length >= 2) {
+            return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
+        }
+        return cleaned;
+    }
+
+    /**
+     * Validate UPI ID using regex
+     * Regex (Unit-10): Pattern matching for UPI validation
+     * Valid formats: name@upi, name@paytm, name@ybl, 9876543210@upi, etc.
+     */
+    function validateUpiId(upiId) {
+        // Regex: alphanumeric (including dots and numbers), @ symbol, followed by provider name
+        // Common UPI handles: @upi, @paytm, @ybl, @okaxis, @okicici, @okhdfcbank, etc.
+        const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z]{2,}$/;
+        return regex.test(upiId.trim());
+    }
+
+    // ============================================================================
+    // TRANSACTION DISPLAY FUNCTIONS (Unit-9: DOM Manipulation)
+    // ============================================================================
+
+    /**
+     * Display transactions in table
+     * DOM Manipulation (Unit-9): Creating and inserting elements
+     */
+    function displayTransactions(transactions = null) {
+        const tbody = document.getElementById('txn-table-body');
+        const emptyState = document.getElementById('empty-state');
+
+        if (!tbody) return;
+
+        // Get transactions if not provided
+        if (!transactions) {
+            transactions = getTransactionsFromStorage();
+        }
+
+        // Clear existing rows
+        tbody.innerHTML = '';
+
+        if (transactions.length === 0) {
+            emptyState.style.display = 'block';
+            document.getElementById('txn-table').style.display = 'none';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        document.getElementById('txn-table').style.display = 'table';
+
+        // DOM Manipulation: Creating table rows dynamically
+        transactions.forEach(txn => {
+            const row = document.createElement('tr');
+            const isCredit = txn.type === 'credit' || txn.description?.toLowerCase().includes('recharge');
+            const amountClass = isCredit ? 'text-success' : 'text-danger';
+            const amountPrefix = isCredit ? '+' : '-';
+
+            // Clean up description - remove specific internal tags like [MANUAL FIX]
+            let cleanDesc = (txn.description || 'Transaction').replace(/\s*\[MANUAL FIX\]\s*/gi, '').trim();
+
+            // Get username (use username field if available, otherwise show method)
+            const displayUser = txn.username || txn.method || 'N/A';
+
+            row.innerHTML = `
+            <td>
+                <code class="small">${txn.id}</code>
+            </td>
+            <td>
+                <div class="fw-semibold">${cleanDesc}</div>
+                <small class="text-muted">${displayUser}</small>
+            </td>
+            <td class="${amountClass} fw-bold">
+                ${amountPrefix}₹${parseFloat(txn.amount).toFixed(2)}
+            </td>
+            <td>
+                <span class="badge ${txn.status === 'success' ? 'bg-success' : 'bg-danger'}">
+                    ${txn.status.toUpperCase()}
+                </span>
+            </td>
+            <td>
+                <div>${txn.date}</div>
+                <small class="text-muted">${txn.time}</small>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="downloadInvoice('${txn.id}')">
+                    <i class="bi bi-download"></i>
+                </button>
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
+
+        // Update statistics
+        updateStatistics(transactions);
+    }
+
+    /**
+     * Update wallet statistics
+     */
+    function updateStatistics(transactions) {
+        let totalCredited = 0;
+        let totalDebited = 0;
+        let successCount = 0;
+
+        transactions.forEach(txn => {
+            const amount = parseFloat(txn.amount) || 0;
+            const isCredit = txn.type === 'credit' || txn.description?.toLowerCase().includes('recharge');
+
+            if (txn.status === 'success') {
+                successCount++;
+                if (isCredit) {
+                    totalCredited += amount;
+                } else {
+                    totalDebited += amount;
+                }
+            }
+        });
+
+        document.getElementById('total-credited').textContent = `₹${totalCredited.toFixed(0)}`;
+        document.getElementById('total-debited').textContent = `₹${totalDebited.toFixed(0)}`;
+        document.getElementById('total-transactions').textContent = transactions.length;
+
+        const successRate = transactions.length > 0 ?
+            Math.round((successCount / transactions.length) * 100) : 0;
+        document.getElementById('success-rate').textContent = `${successRate}%`;
+    }
+
+    // ============================================================================
+    // FILTER FUNCTIONS (Unit-9: Event Handling)
+    // ============================================================================
+
+    /**
+     * Apply filters to transactions
+     * Event Handling (Unit-9): Responding to user actions
+     */
+    function applyFilters() {
+        const startDate = document.getElementById('filter-start-date').value;
+        const endDate = document.getElementById('filter-end-date').value;
+        const status = document.getElementById('filter-status').value;
+
+        let transactions = getTransactionsFromStorage();
+
+        // Filter by date range
+        if (startDate) {
+            transactions = transactions.filter(txn => txn.date >= startDate);
+        }
+        if (endDate) {
+            transactions = transactions.filter(txn => txn.date <= endDate);
+        }
+
+        // Filter by status
+        if (status) {
+            transactions = transactions.filter(txn => txn.status === status);
+        }
+
+        displayTransactions(transactions);
+    }
+
+    // ============================================================================
+    // PAYMENT PROCESSING (Mock Gateway)
+    // ============================================================================
+
+    /**
+     * Generate unique transaction ID
+     */
+    function generateTransactionId() {
+        const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '');
+        const random = Math.floor(Math.random() * 900) + 100;
+        return `TXN${timestamp}${random}`;
+    }
+
+    /**
+     * Process payment via backend API (syncs with wallets.txt)
+     * This ensures the balance is stored on the server, not just localStorage
+     */
+    async function processPayment(amount, method) {
+        try {
+            // Call the backend API to add money to wallet (this saves to wallets.txt)
+            const response = await fetch('/user/wallet/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(amount),
+                    method: method
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.transaction) {
+                // Transaction was successful - return backend response
+                const txn = data.transaction;
+                return {
+                    id: txn.id,
+                    amount: txn.amount,
+                    method: txn.method || method,
+                    status: txn.status,
+                    type: 'credit',
+                    description: txn.description || 'Wallet Recharge',
+                    date: txn.date,
+                    time: txn.time,
+                    timestamp: txn.timestamp,
+                    new_balance: txn.new_balance
+                };
+            } else {
+                // Backend reported failure
+                const now = new Date();
+                return {
+                    id: `TXN${Date.now()}`,
+                    amount: parseFloat(amount),
+                    method: method,
+                    status: 'failed',
+                    type: 'credit',
+                    description: data.error || 'Payment Failed',
+                    date: now.toISOString().split('T')[0],
+                    time: now.toTimeString().split(' ')[0],
+                    timestamp: now.toISOString()
+                };
+            }
+        } catch (error) {
+            console.error('Payment API error:', error);
+            // Fallback: simulate locally if backend is unavailable
+            return new Promise((resolve) => {
+                const delay = Math.random() * 2000 + 1000;
+                setTimeout(() => {
+                    const isSuccess = Math.random() < 0.8;
+                    const now = new Date();
+                    resolve({
+                        id: generateTransactionId(),
+                        amount: parseFloat(amount),
+                        method: method,
+                        status: isSuccess ? 'success' : 'failed',
+                        type: 'credit',
+                        description: 'Wallet Recharge (Local)',
+                        date: now.toISOString().split('T')[0],
+                        time: now.toTimeString().split(' ')[0],
+                        timestamp: now.toISOString()
+                    });
+                }, delay);
+            });
+        }
+    }
+
+    // ============================================================================
+    // INVOICE GENERATION (Unit-10)
+    // ============================================================================
+
+    /**
+     * Generate and download HTML invoice
+     * DOM Manipulation: Creating downloadable content
+     */
+    function downloadInvoice(txnId) {
+        const transactions = getTransactionsFromStorage();
+        const txn = transactions.find(t => t.id === txnId);
+
+        if (!txn) {
+            alert('Transaction not found!');
+            return;
+        }
+
+        // Generate HTML invoice using template literals
+        const invoiceHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - ${txn.id}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        .invoice-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .invoice-header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .invoice-header p { opacity: 0.9; font-size: 1.1rem; }
+        .invoice-body { padding: 40px; }
+        .invoice-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #e0e0e0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .info-block h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-block p { font-size: 1rem; color: #333; }
+        .amount-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .amount-section h2 {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .amount-section .amount { font-size: 3rem; font-weight: 700; }
+        .transaction-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: #666; font-weight: 500; }
+        .detail-value { color: #333; font-weight: 600; }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: ${txn.status === 'success' ? '#28a745' : '#dc3545'};
+            color: white;
+        }
+        .invoice-footer {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            color: #666;
+        }
+        .invoice-footer p { margin-bottom: 10px; }
+        .brand { color: #667eea; font-weight: 700; }
+        @media print {
+            body { background: white; padding: 0; }
+            .invoice-container { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <h1>📋 INVOICE</h1>
+            <p>SkillVerse Payment Receipt</p>
+        </div>
+        
+        <div class="invoice-body">
+            <div class="invoice-info">
+                <div class="info-block">
+                    <h3>Transaction ID</h3>
+                    <p>${txn.id}</p>
+                </div>
+                <div class="info-block">
+                    <h3>Date & Time</h3>
+                    <p>${txn.date} at ${txn.time}</p>
+                </div>
+                <div class="info-block">
+                    <h3>Status</h3>
+                    <p><span class="status-badge">${txn.status.toUpperCase()}</span></p>
+                </div>
+            </div>
+            
+            <div class="amount-section">
+                <h2>Total Amount</h2>
+                <div class="amount">₹${parseFloat(txn.amount).toFixed(2)}</div>
+            </div>
+            
+            <div class="transaction-details">
+                <div class="detail-row">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">${txn.description || 'Transaction'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method</span>
+                    <span class="detail-value">${(txn.method || 'N/A').toUpperCase()}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction Date</span>
+                    <span class="detail-value">${txn.date}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction Time</span>
+                    <span class="detail-value">${txn.time}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="invoice-footer">
+            <p>Thank you for using <span class="brand">SkillVerse</span>!</p>
+            <p>This is a computer-generated invoice. No signature required.</p>
+            <p>Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+        // Create and download HTML file
+        const blob = new Blob([invoiceHTML], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice_${txn.id}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Export transactions to CSV
+     */
+    function exportToCSV() {
+        const transactions = getTransactionsFromStorage();
+
+        if (transactions.length === 0) {
+            alert('No transactions to export!');
+            return;
+        }
+
+        // CSV Header
+        let csv = 'Transaction ID,Amount,Status,Method,Description,Date,Time\n';
+
+        // CSV Rows
+        transactions.forEach(txn => {
+            csv += `${txn.id},${txn.amount},${txn.status},${txn.method},"${txn.description || ''}",${txn.date},${txn.time}\n`;
+        });
+
+        // Download CSV
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ============================================================================
+    // PAYMENT RESULT DISPLAY
+    // ============================================================================
+
+    function showPaymentResult(txn) {
+        const modal = new bootstrap.Modal(document.getElementById('paymentResultModal'));
+        const isSuccess = txn.status === 'success';
+
+        document.getElementById('result-icon').innerHTML = isSuccess
+            ? '<div style="width:100px;height:100px;margin:0 auto;background:linear-gradient(135deg,#11998e,#38ef7d);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="bi bi-check-lg text-white" style="font-size:3rem;"></i></div>'
+            : '<div style="width:100px;height:100px;margin:0 auto;background:linear-gradient(135deg,#f093fb,#f5576c);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="bi bi-x-lg text-white" style="font-size:3rem;"></i></div>';
+
+        document.getElementById('result-title').textContent = isSuccess
+            ? 'Payment Successful!'
+            : 'Payment Failed';
+
+        document.getElementById('result-message').innerHTML = isSuccess
+            ? `₹${parseFloat(txn.amount).toFixed(2)} has been added to your wallet`
+            : 'The transaction could not be processed. Please try again.';
+
+        document.getElementById('result-txn-id').textContent = `Transaction ID: ${txn.id}`;
+
+        document.getElementById('result-buttons').innerHTML = isSuccess
+            ? `<button class="btn btn-primary" onclick="downloadInvoice('${txn.id}')"><i class="bi bi-download me-2"></i>Download Invoice</button>
+           <button class="btn btn-outline-primary" data-bs-dismiss="modal">Done</button>`
+            : `<button class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addMoneyModal">Try Again</button>
+           <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>`;
+
+        modal.show();
+    }
+
+    // ============================================================================
+    // EVENT LISTENERS (Unit-9: Event Handling)
+    // ============================================================================
+
+    /**
+     * Calculate wallet balance from transaction history
+     * This is the ACCURATE way to determine balance: sum of credits - sum of debits
+     */
+    function calculateBalanceFromTransactions() {
+        const transactions = getTransactionsFromStorage();
+        let balance = 0;
+
+        transactions.forEach(txn => {
+            if (txn.status === 'success') {
+                const amount = parseFloat(txn.amount) || 0;
+                const isCredit = txn.type === 'credit' ||
+                    (txn.description && txn.description.toLowerCase().includes('recharge'));
+
+                if (isCredit) {
+                    balance += amount;  // Add credits
+                } else {
+                    balance -= amount;  // Subtract debits
+                }
+            }
+        });
+
+        return Math.max(0, balance);  // Balance can't be negative
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // =====================================================================
+        // BACKEND AS SINGLE SOURCE OF TRUTH
+        // =====================================================================
+        // Use SERVER_WALLET_BALANCE from Flask (wallets.txt is source of truth)
+        // No localStorage needed - backend handles all balance storage
+
+        // Display the server-provided balance
+        document.getElementById('wallet-balance').textContent = `₹${SERVER_WALLET_BALANCE.toFixed(2)}`;
+
+        // Display existing transactions (from server)
+        displayTransactions();
+
+        // Quick amount buttons
+        document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('add-amount').value = this.dataset.amount;
+                document.querySelectorAll('.quick-amount-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Proceed to payment button
+        document.getElementById('proceed-to-payment').addEventListener('click', function () {
+            const amount = parseFloat(document.getElementById('add-amount').value);
+            const method = document.querySelector('input[name="payment-method"]:checked').value;
+
+            if (!amount || amount < 1 || amount > 50000) {
+                document.getElementById('add-amount').classList.add('is-invalid');
+                return;
+            }
+
+            document.getElementById('add-amount').classList.remove('is-invalid');
+            currentPaymentAmount = amount;
+            currentPaymentMethod = method;
+
+            // Update payment modal
+            document.getElementById('payment-amount-display').textContent = `₹${amount.toFixed(2)}`;
+
+            // Show/hide appropriate form based on payment method
+            const cardForm = document.getElementById('payment-form-card');
+            const upiForm = document.getElementById('payment-form-upi');
+
+            if (method === 'upi') {
+                cardForm.style.display = 'none';
+                upiForm.style.display = 'block';
+            } else {
+                cardForm.style.display = 'block';
+                upiForm.style.display = 'none';
+            }
+
+            // Close add money modal and open payment gateway
+            bootstrap.Modal.getInstance(document.getElementById('addMoneyModal')).hide();
+            setTimeout(() => {
+                new bootstrap.Modal(document.getElementById('paymentGatewayModal')).show();
+            }, 300);
+        });
+
+        // Card number formatting
+        document.getElementById('card-number').addEventListener('input', function (e) {
+            this.value = formatCardNumber(this.value);
+        });
+
+        // Expiry date formatting
+        document.getElementById('card-expiry').addEventListener('input', function (e) {
+            this.value = formatExpiryDate(this.value);
+        });
+
+        // CVV - numbers only
+        document.getElementById('card-cvv').addEventListener('input', function (e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        // Card name - letters only
+        document.getElementById('card-name').addEventListener('input', function (e) {
+            this.value = this.value.toUpperCase().replace(/[^A-Z\s]/g, '');
+        });
+
+        // UPI ID formatting - lowercase and allow @ symbol
+        document.getElementById('upi-id').addEventListener('input', function (e) {
+            this.value = this.value.toLowerCase().replace(/[^a-z0-9._@-]/g, '');
+        });
+
+        // Card Payment form submission
+        document.getElementById('payment-form-card').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const cardNumber = document.getElementById('card-number').value;
+            const cardName = document.getElementById('card-name').value;
+            const cardExpiry = document.getElementById('card-expiry').value;
+            const cardCVV = document.getElementById('card-cvv').value;
+
+            // Reset validation states
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            let isValid = true;
+
+            // Validate each field using regex (Unit-10)
+            if (!validateCardNumber(cardNumber)) {
+                document.getElementById('card-number').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!validateCardName(cardName)) {
+                document.getElementById('card-name').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!validateExpiryDate(cardExpiry)) {
+                document.getElementById('card-expiry').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!validateCVV(cardCVV)) {
+                document.getElementById('card-cvv').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Show loading state
+            const payBtn = document.getElementById('pay-now-btn-card');
+            const btnText = document.getElementById('pay-btn-text-card');
+            const spinner = document.getElementById('pay-spinner-card');
+
+            payBtn.disabled = true;
+            btnText.textContent = 'Processing...';
+            spinner.classList.remove('d-none');
+
+            // Process payment via backend API
+            const txn = await processPayment(currentPaymentAmount, 'card');
+
+            // Update wallet balance if successful
+            if (txn.status === 'success') {
+                const newBalance = txn.new_balance !== undefined
+                    ? txn.new_balance
+                    : (getWalletBalance() + currentPaymentAmount);
+                updateWalletBalance(newBalance);
+            }
+
+            // Save transaction
+            addTransaction(txn);
+            displayTransactions();
+
+            // Reset button state
+            payBtn.disabled = false;
+            btnText.textContent = 'Pay Now';
+            spinner.classList.add('d-none');
+
+            // Close payment modal and show result
+            bootstrap.Modal.getInstance(document.getElementById('paymentGatewayModal')).hide();
+            setTimeout(() => {
+                showPaymentResult(txn);
+            }, 300);
+
+            // Reset form
+            document.getElementById('payment-form-card').reset();
+        });
+
+        // UPI Payment form submission
+        document.getElementById('payment-form-upi').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const upiId = document.getElementById('upi-id').value;
+
+            // Reset validation states
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            // Validate UPI ID
+            if (!validateUpiId(upiId)) {
+                document.getElementById('upi-id').classList.add('is-invalid');
+                return;
+            }
+
+            // Show loading state
+            const payBtn = document.getElementById('pay-now-btn-upi');
+            const btnText = document.getElementById('pay-btn-text-upi');
+            const spinner = document.getElementById('pay-spinner-upi');
+
+            payBtn.disabled = true;
+            btnText.textContent = 'Verifying...';
+            spinner.classList.remove('d-none');
+
+            // Process payment via backend API
+            const txn = await processPayment(currentPaymentAmount, 'upi');
+
+            // Update wallet balance if successful
+            if (txn.status === 'success') {
+                const newBalance = txn.new_balance !== undefined
+                    ? txn.new_balance
+                    : (getWalletBalance() + currentPaymentAmount);
+                updateWalletBalance(newBalance);
+            }
+
+            // Save transaction
+            addTransaction(txn);
+            displayTransactions();
+
+            // Reset button state
+            payBtn.disabled = false;
+            btnText.textContent = 'Verify & Pay';
+            spinner.classList.add('d-none');
+
+            // Close payment modal and show result
+            bootstrap.Modal.getInstance(document.getElementById('paymentGatewayModal')).hide();
+            setTimeout(() => {
+                showPaymentResult(txn);
+            }, 300);
+
+            // Reset form
+            document.getElementById('payment-form-upi').reset();
+        });
+
+        // Apply filters button
+        document.getElementById('apply-filters').addEventListener('click', applyFilters);
+
+        // Export CSV button
+        document.getElementById('export-csv-btn').addEventListener('click', exportToCSV);
+    });
+</script>
+{% endblock %}

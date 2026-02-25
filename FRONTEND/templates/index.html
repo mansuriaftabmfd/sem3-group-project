@@ -1,0 +1,1230 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillVerse - Find the Perfect Skill Match{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section id="hero" class="hero-section d-flex align-items-center position-relative min-vh-100" style="z-index: 20;">
+    <!-- Background Orbs -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden pe-none">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Grid Pattern -->
+    <div class="grid-overlay position-absolute w-100 h-100 pe-none"></div>
+
+    <div class="container position-relative z-1 pt-5">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-10 col-xl-8">
+                <!-- Badge -->
+                <div
+                    class="badge-custom d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-4 fade-in-up delay-0">
+                    <i class="bi bi-people-fill text-primary"></i>
+                    <span class="text-primary fw-medium">Join {{ stats_data.total_users }}+ professionals
+                        worldwide</span>
+                </div>
+
+                <!-- Heading -->
+                <h1 class="display-3 fw-bold mb-4 text-body fade-in-up delay-100 hero-title">
+                    Find the Perfect <br>
+                    <span class="gradient-text">Skill Match</span>
+                </h1>
+
+                <!-- Subheading -->
+                <p class="lead text-muted mb-5 mx-auto fade-in-up delay-200" style="max-width: 650px;">
+                    Connect with talented professionals for your projects. Browse services, join communities, and build
+                    something amazing together.
+                </p>
+
+                <!-- Search Bar with Live Search Dropdown -->
+                <div id="heroSearchWrapper" class="mb-5 fade-in-up delay-300 mx-auto"
+                    style="max-width: 600px; position: relative !important;">
+                    <div class="input-group shadow-lg rounded-pill p-2 bg-body">
+                        <span class="input-group-text bg-transparent border-0 ms-2"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="heroSearch" class="form-control border-0 bg-transparent shadow-none"
+                            placeholder="Search services..." aria-label="Search" autocomplete="off">
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold" type="button"
+                            id="heroSearchBtn">Search</button>
+                    </div>
+
+                    <!-- Live Search Results Dropdown -->
+                    <div id="searchDropdown" class="search-dropdown">
+                        <div id="searchResults"></div>
+                        <div id="searchLoading" class="text-center py-3" style="display: none;">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Searching...</span>
+                            </div>
+                            <span class="ms-2 text-muted">Searching...</span>
+                        </div>
+                        <div id="searchNoResults" class="text-center py-4 text-muted" style="display: none;">
+                            <i class="bi bi-search fs-4 d-block mb-2"></i>
+                            No services found
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-3">
+                        <span class="text-muted small">Popular:</span>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill border-0 popular-search-btn"
+                            data-search="Web Development">Web Dev</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill border-0 popular-search-btn"
+                            data-search="Design">Design</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill border-0 popular-search-btn"
+                            data-search="Writing">Writing</button>
+                    </div>
+                </div>
+
+                <!-- Live Search Styles -->
+                <style>
+                    /* Parent container anchor */
+                    #heroSearchWrapper {
+                        position: relative !important;
+                        z-index: 1050;
+                    }
+
+                    .search-dropdown {
+                        position: absolute;
+                        top: calc(100% + 15px);
+                        left: 0;
+                        width: 100%;
+
+                        /* Opaque background — no expensive backdrop-filter */
+                        background: var(--card-bg);
+
+                        border: 1px solid rgba(var(--border-color-rgb), 0.2);
+                        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+                        border-radius: 24px;
+                        box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.5);
+                        z-index: 10000;
+                        overflow: hidden;
+                        display: none;
+                        transform-origin: top center;
+                        animation: dropdownEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+
+                    @keyframes dropdownEnter {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.95) translateY(-10px);
+                        }
+
+                        to {
+                            opacity: 1;
+                            transform: scale(1) translateY(0);
+                        }
+                    }
+
+                    .search-result-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 16px 24px;
+                        text-decoration: none;
+                        color: var(--foreground-color);
+                        border-bottom: 1px solid rgba(var(--border-color-rgb), 0.1);
+                        transition: all 0.2s ease;
+                        position: relative;
+                    }
+
+                    .search-result-item:hover {
+                        background: rgba(var(--primary-rgb), 0.1);
+                        padding-left: 28px;
+                        /* Subtle slide */
+                    }
+
+                    /* Highlighting the active item if needed */
+                    .search-result-item:active {
+                        background: rgba(var(--primary-rgb), 0.15);
+                    }
+
+                    .search-result-item:last-child {
+                        border-bottom: none;
+                    }
+
+                    .search-result-left {
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        flex: 1;
+                        min-width: 0;
+                    }
+
+                    .search-result-img {
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 12px;
+                        object-fit: cover;
+                        background-color: var(--card-bg);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        border: 1px solid rgba(var(--border-color-rgb), 0.1);
+                    }
+
+                    .search-result-text {
+                        display: flex;
+                        flex-direction: column;
+                        min-width: 0;
+                        gap: 2px;
+                    }
+
+                    .search-result-title {
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                        color: var(--foreground-color);
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                    .search-result-sub {
+                        font-size: 0.75rem;
+                        color: var(--muted-color);
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-weight: 500;
+                    }
+
+                    .search-result-price {
+                        font-weight: 700;
+                        color: var(--primary-color);
+                        font-size: 1rem;
+                        white-space: nowrap;
+                        margin-left: 15px;
+                        padding: 6px 12px;
+                        background: rgba(var(--primary-rgb), 0.1);
+                        border-radius: 12px;
+                    }
+
+                    .search-view-all {
+                        display: block;
+                        text-align: center;
+                        padding: 16px;
+                        background: rgba(var(--card-bg-rgb), 0.5);
+                        color: var(--primary-color) !important;
+                        font-weight: 600;
+                        text-decoration: none;
+                        font-size: 0.9rem;
+                        border-top: 1px solid rgba(var(--border-color-rgb), 0.1);
+                        transition: all 0.2s;
+                    }
+
+                    .search-view-all:hover {
+                        background: var(--primary-color);
+                        color: white !important;
+                    }
+
+                    /* Scrollbar styling */
+                    .search-dropdown::-webkit-scrollbar {
+                        width: 6px;
+                    }
+
+                    .search-dropdown::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+
+                    .search-dropdown::-webkit-scrollbar-thumb {
+                        background-color: rgba(156, 163, 175, 0.5);
+                        border-radius: 20px;
+                    }
+                </style>
+
+                <!-- Stats -->
+                <div class="row mt-5 pt-4 g-4 fade-in-up delay-500">
+                    <div class="col-6 col-md-4">
+                        <div class="stat-card">
+                            <div class="h2 fw-bold gradient-text mb-0 counter"
+                                data-target="{{ stats_data.total_users }}">0</div>
+                            <div class="text-muted small">Professionals</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="stat-card">
+                            <div class="h2 fw-bold gradient-text mb-0 counter"
+                                data-target="{{ stats_data.total_services }}">0</div>
+                            <div class="text-muted small">Services Available</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="h2 fw-bold gradient-text mb-0"><span class="counter"
+                                    data-target="{{ stats_data.satisfaction_rate }}">0</span>%</div>
+                            <div class="text-muted small">Satisfaction Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Fade -->
+    <div class="position-absolute bottom-0 start-0 w-100 hero-fade"></div>
+</section>
+
+<!-- Categories Section (Replacing Features) -->
+<section id="features" class="py-5 bg-light-subtle">
+    <div class="container py-5">
+        <div class="text-center mx-auto mb-5" style="max-width: 700px;">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">Categories</span>
+            <h2 class="display-5 fw-bold mb-3">Browse by <span class="gradient-text">Category</span></h2>
+            <p class="text-muted lead">Explore services across various skill categories and find exactly what you need.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            {% for cat in category_stats %}
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ url_for('service.browse', category=cat.id) }}" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm feature-card p-4 text-center hover-slide-card">
+                        <div
+                            class="feature-icon mb-4 rounded-3 d-flex align-items-center justify-content-center text-white bg-gradient-blue shadow mx-auto">
+                            <i class="bi {{ cat.icon }}"></i>
+                        </div>
+                        <h3 class="h5 fw-bold mb-2 text-body">{{ cat.name }}</h3>
+                        <p class="text-muted mb-0">{{ cat.service_count }} services</p>
+                    </div>
+                </a>
+            </div>
+            {% else %}
+            <div class="col-12 text-center text-muted">No categories found.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Skills Section (Featured Services) -->
+<section id="skills" class="py-5">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div style="max-width: 600px;">
+                <h2 class="display-5 fw-bold mb-3">Featured Services</h2>
+                <p class="text-muted lead mb-0">Discover top-rated services from our most talented professionals.</p>
+            </div>
+            <a href="{{ url_for('service.browse') }}"
+                class="btn btn-outline-primary rounded-pill px-4 d-none d-md-inline-block">View All</a>
+        </div>
+
+        <!-- Skills Grid -->
+        <div class="row g-4" id="skillsGrid">
+            {% for service in featured_services %}
+            <div class="col-md-6 col-lg-4 skill-item reveal-up">
+                <div class="card h-100 border-0 shadow-sm rounded-4 skill-card position-relative overflow-hidden hover-lift"
+                    data-url="{{ url_for('service.detail', service_id=service.id) }}"
+                    onclick="window.location.href=this.dataset.url">
+
+                    <!-- Service Image -->
+                    <div class="position-relative">
+                        <img src="{{ service.get_image_url() }}"
+                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80';"
+                            class="w-100 object-fit-cover" style="height: 200px;" alt="{{ service.title }}">
+
+                        <!-- Favorite Button -->
+                        <button type="button"
+                            class="position-absolute top-0 end-0 m-2 btn btn-light rounded-circle shadow-sm p-2 d-flex align-items-center justify-content-center border-0 favorite-btn"
+                            style="width: 32px; height: 32px; z-index: 5;" data-service-id="{{ service.id }}">
+                            <i
+                                class="bi bi-heart{% if current_user.is_authenticated and service.is_favorited_by(current_user) %}-fill{% endif %} text-danger"></i>
+                        </button>
+
+                        <!-- Category Badge -->
+                        <span
+                            class="position-absolute top-0 start-0 m-2 badge bg-dark bg-opacity-75 backdrop-blur rounded-pill fw-normal">
+                            {{ service.category.name if service.category else 'Service' }}
+                        </span>
+                    </div>
+
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-0 text-truncate flex-grow-1 me-2" style="font-size: 1.1rem;">{{
+                                service.title }}</h5>
+                            <div class="text-primary fw-bold">₹{{ "%.0f"|format(service.price) }}</div>
+                        </div>
+
+                        <!-- Rating & Delivery -->
+                        <div class="d-flex align-items-center gap-3 text-muted small mb-3">
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <span class="text-body fw-medium">{{ service.get_average_rating() }}</span>
+                                <span>({{ service.get_review_count() }})</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="bi bi-clock"></i> {{ service.delivery_time }}
+                            </div>
+                        </div>
+
+                        <!-- User Info -->
+                        <div class="d-flex align-items-center mt-auto pt-2 border-top">
+                            <img src="{{ service.provider.get_avatar_url() }}"
+                                class="rounded-circle object-fit-cover me-2" style="width: 32px; height: 32px;"
+                                alt="{{ service.provider.username }}">
+                            <div class="small text-muted text-truncate" style="max-width: 120px;">
+                                By <span class="text-dark fw-medium">{{ service.provider.username }}</span>
+                            </div>
+                            <button class="btn btn-sm btn-light rounded-circle ms-auto btn-action-arrow">
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No featured services yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5 d-md-none">
+            <button class="btn btn-outline-primary btn-lg px-4" data-url="{{ url_for('service.browse') }}"
+                onclick="window.location.href=this.dataset.url">View All Services</button>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-5 position-relative overflow-hidden">
+    <div class="position-absolute top-50 start-50 translate-middle w-100 h-100 bg-gradient-radial opacity-10 pe-none">
+    </div>
+    <div class="container py-5 position-relative z-1">
+        <div class="text-center mx-auto mb-5" style="max-width: 700px;">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">How It Works</span>
+            <h2 class="display-5 fw-bold mb-3">Get started in <span class="gradient-text">4 simple steps</span></h2>
+            <p class="text-muted lead">From sign-up to your first skill swap — it only takes minutes.</p>
+        </div>
+
+        <!-- Define Steps Data -->
+        {% set steps = [
+        {'title': 'Create Profile', 'desc': 'Sign up and build your professional profile showcasing your skills and
+        portfolio.', 'icon': 'person-plus', 'bg': 'bg-gradient-blue'},
+        {'title': 'Find Services', 'desc': 'Browse through categories or search for specific skills you need for your
+        project.', 'icon': 'search', 'bg': 'bg-gradient-purple'},
+        {'title': 'Connect & Chat', 'desc': 'Reach out to service providers, discuss requirements, and agree on terms.',
+        'icon': 'chat-dots', 'bg': 'bg-gradient-pink'},
+        {'title': 'Get It Done', 'desc': 'Work together to complete the project and leave a review for future
+        reference.', 'icon': 'check-circle', 'bg': 'bg-gradient-orange'}
+        ] %}
+
+        <!-- Desktop Steps (Timeline) -->
+        <div class="d-none d-lg-block">
+            <div class="position-relative mb-5" style="height: 100px;">
+                <!-- Line -->
+                <div class="position-absolute top-50 start-0 end-0 translate-middle-y bg-light-gray"
+                    style="height: 4px; z-index: 0;"></div>
+                <div class="position-absolute top-50 start-0 translate-middle-y bg-gradient-primary rounded-pill transition-all"
+                    id="progressLine" style="height: 4px; width: 0%; z-index: 0;"></div>
+
+                <!-- Steps Buttons -->
+                <div class="d-flex justify-content-between position-relative z-1">
+                    {% for step in steps %}
+                    <button class="step-btn {{ 'active' if loop.index0 == 0 else '' }}" data-step="{{ loop.index0 }}">{{
+                        loop.index }}</button>
+                    {% endfor %}
+                </div>
+                <div class="d-flex justify-content-between position-relative z-1 mt-2">
+                    {% for step in steps %}
+                    <span
+                        class="step-label {{ 'active text-primary' if loop.index0 == 0 else '' }} fw-bold small text-center"
+                        style="width: 40px;">Step {{ loop.index }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Step Content Display -->
+            <div class="text-center mx-auto" style="max-width: 600px; height: 250px;">
+                {% for step in steps %}
+                <div class="step-content {{ 'active fade-in' if loop.index0 == 0 else 'd-none fade-in' }}"
+                    data-content="{{ loop.index0 }}">
+                    <div class="step-icon mb-4 mx-auto rounded-4 d-flex align-items-center justify-content-center text-white {{ step.bg }} shadow-lg"
+                        style="width: 80px; height: 80px;">
+                        <i class="bi bi-{{ step.icon }} fs-2"></i>
+                    </div>
+                    <h3 class="h3 fw-bold mb-3">{{ step.title }}</h3>
+                    <p class="text-muted lead">{{ step.desc }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Mobile Steps (Vertical List) -->
+        <div class="d-lg-none d-flex flex-column gap-5">
+            {% for step in steps %}
+            <div class="d-flex gap-4">
+                <div class="flex-shrink-0 step-icon-mobile rounded-4 d-flex align-items-center justify-content-center text-white {{ step.bg }} shadow"
+                    style="width: 56px; height: 56px;">
+                    <i class="bi bi-{{ step.icon }} fs-4"></i>
+                </div>
+                <div>
+                    <div class="text-primary fw-medium small mb-1">Step {{ loop.index }}</div>
+                    <h3 class="h5 fw-bold mb-2">{{ step.title }}</h3>
+                    <p class="text-muted small">{{ step.desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="py-5 position-relative">
+    <div class="container py-5">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-end mb-5 flex-wrap gap-3">
+            <div style="max-width: 600px;">
+
+                <h2 class="display-5 fw-bold mb-3">Our <span class="gradient-text">Testimonials</span></h2>
+                <p class="text-muted lead mb-0">Discover how SkillVerse is transforming careers and projects found
+                    directly from our users.</p>
+            </div>
+            <div class="d-flex gap-2">
+                {% if current_user.is_authenticated %}
+                <button type="button" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm" data-bs-toggle="modal"
+                    data-bs-target="#addTestimonialModal">
+                    <i class="bi bi-pencil-square me-2"></i>Add Review
+                </button>
+                {% else %}
+                <a href="{{ url_for('auth.login', next=url_for('main.index', _anchor='testimonials')) }}"
+                    class="btn btn-outline-primary fw-bold px-4 rounded-pill shadow-sm">
+                    Login to Review
+                </a>
+                {% endif %}
+                <button class="btn btn-outline-secondary fw-bold px-4 rounded-pill" data-bs-toggle="modal"
+                    data-bs-target="#allTestimonialsModal">View All</button>
+            </div>
+        </div>
+
+        <!-- Carousel -->
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% if testimonials %}
+                {% for chunk in testimonials|batch(2) %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <div class="row g-4">
+                        {% for testimonial in chunk %}
+                        <div class="col-lg-6">
+                            <div
+                                class="card h-100 border-0 p-4 p-md-5 rounded-4 shadow-lg position-relative overflow-hidden">
+                                <!-- Quote Icon Background -->
+                                <div class="position-absolute top-0 end-0 p-4 opacity-25">
+                                    <i class="bi bi-quote display-1 text-primary"></i>
+                                </div>
+
+                                <div class="d-flex flex-column h-100 justify-content-between position-relative z-1">
+                                    <!-- Review Content -->
+                                    <div class="mb-4">
+                                        <div class="d-flex text-warning mb-3">
+                                            {% for i in range(testimonial.rating) %}<i
+                                                class="bi bi-star-fill me-1"></i>{% endfor %}
+                                            {% for i in range(5 - testimonial.rating) %}<i
+                                                class="bi bi-star me-1 opacity-25"></i>{% endfor %}
+                                        </div>
+                                        <p class="lead fst-italic mb-0" style="font-size: 1.1rem; line-height: 1.7;">"{{
+                                            testimonial.content | truncate(160) }}"</p>
+                                    </div>
+
+                                    <!-- Footer: User & Button -->
+                                    <div
+                                        class="d-flex align-items-center justify-content-between mt-auto pt-4 border-top">
+                                        <!-- User Info -->
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="{{ testimonial.user.get_avatar_url() }}"
+                                                class="rounded-circle shadow-sm object-fit-cover"
+                                                style="width: 50px; height: 50px;"
+                                                alt="{{ testimonial.user.username }}">
+                                            <div>
+                                                <h6 class="fw-bold mb-0">{{ testimonial.user.full_name or
+                                                    testimonial.user.username }}</h6>
+                                                <span
+                                                    class="badge bg-light text-secondary border rounded-pill fw-normal px-2 py-1 mt-1"
+                                                    style="font-size: 0.75rem;">
+                                                    {{ testimonial.role or 'Member' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Read Full Story Button -->
+                                        <button type="button"
+                                            class="btn btn-sm btn-light rounded-pill px-3 py-2 fw-medium border shadow-sm"
+                                            data-name="{{ testimonial.user.full_name or testimonial.user.username }}"
+                                            data-content="{{ testimonial.content }}"
+                                            data-avatar="{{ testimonial.user.get_avatar_url() }}"
+                                            data-role="{{ testimonial.role or 'Member' }}"
+                                            data-rating="{{ testimonial.rating }}" onclick="openTestimonialModal(this)">
+                                            Read Story
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="carousel-item active">
+                    <div class="text-center py-5">
+                        <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-chat-square-heart"></i></div>
+                        <h3 class="fw-bold">No reviews yet</h3>
+                        <p class="text-muted">Be the first to share your experience with SkillVerse!</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Controls -->
+            <div class="d-flex justify-content-center gap-3 mt-5">
+                <button
+                    class="btn btn-outline-primary rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm"
+                    type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev"
+                    style="width: 50px; height: 50px;">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </button>
+                <button
+                    class="btn btn-outline-primary rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm"
+                    type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next"
+                    style="width: 50px; height: 50px;">
+                    <i class="bi bi-arrow-right fs-5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Read Full Story Modal -->
+<div class="modal fade" id="readStoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header border-0 pb-0 position-relative z-1">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-5 position-relative text-center">
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-5 z-n1"></div>
+
+                <img id="modalAvatar" src=""
+                    class="rounded-circle shadow-lg mb-4 object-fit-cover border border-4 border-white"
+                    style="width: 100px; height: 100px;">
+
+                <h4 id="modalName" class="fw-bold mb-1"></h4>
+                <div class="mb-3">
+                    <span id="modalRole"
+                        class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill"></span>
+                </div>
+
+                <div id="modalStars" class="mb-4 text-warning fs-5">
+                    <!-- JS will populate stars -->
+                </div>
+
+                <i class="bi bi-quote fs-1 text-primary opacity-25 d-block mb-2"></i>
+                <p id="modalContent" class="lead fst-italic" style="line-height: 1.8;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Testimonial Modal -->
+<div class="modal fade" id="addTestimonialModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Share Your Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 pt-3">
+                <p class="text-muted small mb-4">Your review helps our community grow. Please share your honest
+                    feedback.</p>
+
+                <form action="{{ url_for('main.add_testimonial') }}" method="POST">
+                    <!-- Rating -->
+                    <div class="mb-4 text-center p-3 bg-light rounded-3">
+                        <label class="form-label fw-bold d-block mb-2">How would you rate SkillVerse?</label>
+                        <div class="d-flex justify-content-center text-secondary fs-2 gap-3 rating-select"
+                            style="cursor: pointer;">
+                            <i class="bi bi-star transition-all hover-scale" data-value="1"></i>
+                            <i class="bi bi-star transition-all hover-scale" data-value="2"></i>
+                            <i class="bi bi-star transition-all hover-scale" data-value="3"></i>
+                            <i class="bi bi-star transition-all hover-scale" data-value="4"></i>
+                            <i class="bi bi-star transition-all hover-scale" data-value="5"></i>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="5">
+                        <div class="text-center mt-2"><span id="ratingText"
+                                class="text-primary fw-bold small">Excellent</span></div>
+                    </div>
+
+                    <!-- Role Selection -->
+                    <div class="mb-3">
+                        <label for="role" class="form-label fw-bold">I am a...</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i
+                                    class="bi bi-person-badge text-primary"></i></span>
+                            <select class="form-select border-start-0 ps-0" id="role" name="role" required>
+                                <option value="" disabled selected>Select your Role</option>
+                                <option value="Student">Student</option>
+                                <option value="Developer">Developer</option>
+                                <option value="Designer">Designer</option>
+                                <option value="Freelancer">Freelancer</option>
+                                <option value="Instructor">Instructor</option>
+                                <option value="Project Manager">Project Manager</option>
+                                <option value="Entrepreneur">Entrepreneur</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Your Review</label>
+                        <textarea name="content" class="form-control bg-light border-0 rounded-3 p-3 focus-ring"
+                            rows="4" placeholder="What did you like most? How did it help you?" required></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary fw-bold py-3 rounded-pill shadow-sm">
+                            Submit Review <i class="bi bi-send-fill ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View All Modal (List) -->
+<div class="modal fade" id="allTestimonialsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content rounded-4 border-0 h-100 bg-light">
+            <div class="modal-header border-0 bg-white">
+                <div>
+                    <h5 class="modal-title fw-bold">All Reviews</h5>
+                    <p class="text-muted small mb-0">See what everyone is saying</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    {% if testimonials %}
+                    {% for testimonial in testimonials %}
+                    <div class="col-12">
+                        <div class="card border-0 p-4 rounded-4 shadow-sm bg-white hover-shadow transition-all">
+                            <div class="d-flex align-items-start gap-3">
+                                <img src="{{ testimonial.user.get_avatar_url() }}"
+                                    class="rounded-circle object-fit-cover shadow-sm"
+                                    style="width: 50px; height: 50px;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="fw-bold mb-0">{{ testimonial.user.full_name or
+                                            testimonial.user.username }}</h6>
+                                        <div class="text-warning small d-flex">
+                                            {% for i in range(testimonial.rating) %}<i class="bi bi-star-fill"></i>{%
+                                            endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="badge bg-light text-secondary border rounded-pill fw-normal">{{
+                                            testimonial.role }}</span>
+                                        <small class="text-muted ms-2">{{ testimonial.created_at.strftime('%b %d, %Y')
+                                            }}</small>
+                                    </div>
+                                    <p class="text-muted mb-0 small" style="line-height: 1.6;">{{ testimonial.content }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper to open read story modal
+    function openTestimonialModal(element) {
+        document.getElementById('modalName').textContent = element.dataset.name;
+        document.getElementById('modalContent').textContent = element.dataset.content;
+        document.getElementById('modalAvatar').src = element.dataset.avatar;
+        document.getElementById('modalRole').textContent = element.dataset.role;
+        new bootstrap.Modal(document.getElementById('readStoryModal')).show();
+    }
+
+    // Simple rating selector script
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingContainer = document.querySelector('.rating-select');
+        if (ratingContainer) {
+            const stars = ratingContainer.querySelectorAll('i');
+            const input = document.getElementById('ratingInput');
+
+            stars.forEach(star => {
+                star.addEventListener('click', function () {
+                    const value = this.getAttribute('data-value');
+                    input.value = value;
+                    // Update visuals
+                    stars.forEach(s => {
+                        if (s.getAttribute('data-value') <= value) {
+                            s.classList.remove('bi-star');
+                            s.classList.add('bi-star-fill');
+                        } else {
+                            s.classList.remove('bi-star-fill');
+                            s.classList.add('bi-star');
+                        }
+                    });
+                });
+            });
+        }
+    });
+</script>
+
+
+
+<section id="faq" class="py-5 bg-white">
+    <div class="container">
+        <div class="left-section">
+            <div class="header-content">
+                <h1><span class="gradient-text">Frequently <br />Asked Questions</span></h1>
+                <p class="subtitle">Still you have any questions? Contact our Team via support@skillverse.com</p>
+            </div>
+            <div>
+                <button class="btn-see-all" id="seeAllFaqsBtn" onclick="toggleFaqs()" data-expanded="false">See All
+                    FAQ's</button>
+            </div>
+        </div>
+        <div class="right-section">
+            <div class="faq-card expanded">
+                <div class="faq-header">
+                    <h3 class="faq-question">How do I purchase a service on SkillVerse?</h3>
+                    <button class="toggle-btn">
+                        <span class="material-icons-round">keyboard_arrow_down</span>
+                    </button>
+                </div>
+                <hr class="divider" />
+                <div class="faq-content">
+                    <p class="faq-answer">Simply browse for a service, select a package, and use your wallet balance to
+                        place an order. You can also chat with the seller before purchasing.</p>
+                </div>
+            </div>
+            <div class="faq-card collapsed">
+                <div class="faq-header">
+                    <h3 class="faq-question">How does the wallet system work?</h3>
+                    <button class="toggle-btn">
+                        <span class="material-icons-round">keyboard_arrow_down</span>
+                    </button>
+                </div>
+                <hr class="divider" />
+                <div class="faq-content">
+                    <p class="faq-answer">You can add money to your SkillVerse wallet using various payment methods.
+                        This balance is used for secure and instant payments for all services.</p>
+                </div>
+            </div>
+            <div class="faq-card collapsed">
+                <div class="faq-header">
+                    <h3 class="faq-question">Can I offer my own services?</h3>
+                    <button class="toggle-btn">
+                        <span class="material-icons-round">keyboard_arrow_down</span>
+                    </button>
+                </div>
+                <hr class="divider" />
+                <div class="faq-content">
+                    <p class="faq-answer">Yes! You can register as a service provider, create service listings, set your
+                        prices, and manage your availability to start earning.</p>
+                </div>
+            </div>
+            <div class="faq-card collapsed d-none hidden-faq">
+                <div class="faq-header">
+                    <h3 class="faq-question">How do I book a session with a provider?</h3>
+                    <button class="toggle-btn">
+                        <span class="material-icons-round">keyboard_arrow_down</span>
+                    </button>
+                </div>
+                <hr class="divider" />
+                <div class="faq-content">
+                    <p class="faq-answer">Many providers offer specific time slots. You can check their availability
+                        calendar on their service page and book a session that fits your schedule.</p>
+                </div>
+            </div>
+            <div class="faq-card collapsed d-none hidden-faq">
+                <div class="faq-header">
+                    <h3 class="faq-question">Is my payment secure?</h3>
+                    <button class="toggle-btn">
+                        <span class="material-icons-round">keyboard_arrow_down</span>
+                    </button>
+                </div>
+                <hr class="divider" />
+                <div class="faq-content">
+                    <p class="faq-answer">Absolutely. Payments are held securely in escrow until the order is completed
+                        and you are satisfied with the work.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100 pe-none bg-cta-gradient"></div>
+    <div class="container py-5 position-relative z-1">
+        <div class="card bg-white bg-opacity-75 backdrop-blur border rounded-5 p-5 shadow-lg mx-auto overflow-hidden reveal-up"
+            style="max-width: 900px;">
+            <div class="position-absolute top-0 start-0 w-100 h-1 bg-gradient-primary"></div>
+            <div class="text-center">
+                <div
+                    class="badge-custom d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-4 border border-primary border-opacity-25 bg-primary bg-opacity-10">
+                    <i class="bi bi-stars text-primary"></i>
+                    <span class="text-primary fw-medium">Ready to get started?</span>
+                </div>
+                <h2 class="display-4 fw-bold mb-4">Start your skill exchange <span class="gradient-text">journey
+                        today</span></h2>
+                <p class="lead text-muted mb-5 mx-auto" style="max-width: 600px;">Join thousands of professionals. Offer
+                    your services, find talent, and accurate knowledge.</p>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                    <a href="{{ url_for('auth.register') }}"
+                        class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow-lg rounded-3">Create Free Account <i
+                            class="bi bi-arrow-right ms-2"></i></a>
+                    <a href="{{ url_for('service.browse') }}"
+                        class="btn btn-outline-secondary btn-lg px-5 py-3 fw-bold rounded-3">Explore Services</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ========================================
+    // LIVE SEARCH FUNCTIONALITY (Like Amazon/Apple)
+    // Uses: JavaScript Arrays, Loops, Conditionals, Fetch API, setTimeout
+    // ========================================
+
+    var searchDebounceTimer = null;
+    var heroSearchInput = null;
+    var searchDropdown = null;
+    var searchResults = null;
+    var searchLoading = null;
+    var searchNoResults = null;
+    var browseUrl = "{{ url_for('service.browse') }}";
+
+    // Initialize search on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        heroSearchInput = document.getElementById('heroSearch');
+        searchDropdown = document.getElementById('searchDropdown');
+        searchResults = document.getElementById('searchResults');
+        searchLoading = document.getElementById('searchLoading');
+        searchNoResults = document.getElementById('searchNoResults');
+
+        if (heroSearchInput) {
+            // Listen for input (typing) - uses debounce with setTimeout
+            heroSearchInput.addEventListener('input', function (e) {
+                var query = e.target.value.trim();
+
+                // Clear previous timer (debounce pattern)
+                clearTimeout(searchDebounceTimer);
+
+                // If empty or too short, hide dropdown
+                if (query.length < 2) {
+                    hideSearchDropdown();
+                    return;
+                }
+
+                // Wait 300ms before searching (debounce - saves API calls)
+                searchDebounceTimer = setTimeout(function () {
+                    performLiveSearch(query);
+                }, 300);
+            });
+
+            // Handle Enter key
+            heroSearchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    var query = heroSearchInput.value.trim();
+                    if (query) {
+                        window.location.href = browseUrl + '?search=' + encodeURIComponent(query);
+                    }
+                }
+            });
+
+            // Hide dropdown when clicking outside
+            // Modified to ignore theme toggle clicks so dropdown stays open when switching themes
+            document.addEventListener('click', function (e) {
+                // Check if click is inside search wrapper OR on ANY theme toggle elements
+                if (!e.target.closest('#heroSearchWrapper') &&
+                    !e.target.closest('#themeToggle') &&
+                    !e.target.closest('.theme-toggle') &&
+                    !e.target.closest('.btn-theme') &&
+                    !e.target.closest('#theme-icon') &&
+                    !e.target.closest('.theme-toggle-switch') &&
+                    !e.target.closest('.theme-switch-input') &&
+                    !e.target.closest('.slider')) {
+                    hideSearchDropdown();
+                }
+            });
+        }
+
+        // Search button click
+        var searchBtn = document.getElementById('heroSearchBtn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+                var query = heroSearchInput.value.trim();
+                if (query) {
+                    window.location.href = browseUrl + '?search=' + encodeURIComponent(query);
+                } else {
+                    window.location.href = browseUrl;
+                }
+            });
+        }
+
+        // Popular search buttons
+        var popularBtns = document.querySelectorAll('.popular-search-btn');
+        for (var i = 0; i < popularBtns.length; i++) {
+            popularBtns[i].addEventListener('click', function (e) {
+                var searchTerm = e.currentTarget.getAttribute('data-search');
+                heroSearchInput.value = searchTerm;
+                performLiveSearch(searchTerm);
+            });
+        }
+
+        // Favorite buttons
+        var favoriteButtons = document.querySelectorAll('.favorite-btn');
+        for (var j = 0; j < favoriteButtons.length; j++) {
+            favoriteButtons[j].addEventListener('click', handleFavoriteClick);
+        }
+    });
+
+    // Perform live search using Fetch API
+    function performLiveSearch(query) {
+        showSearchLoading();
+
+        fetch('/api/services/search?search=' + encodeURIComponent(query))
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                hideSearchLoading();
+
+                if (data.success && data.services && data.services.length > 0) {
+                    displaySearchResults(data.services, query);
+                } else {
+                    showNoResults();
+                }
+            })
+            .catch(function (error) {
+                console.error('Search Error:', error);
+                hideSearchLoading();
+                hideSearchDropdown();
+            });
+    }
+
+    // Display search results in dropdown
+    function displaySearchResults(services, query) {
+        searchResults.innerHTML = '';
+
+        // Limit to 5 results for dropdown (Array slice)
+        var displayServices = services.slice(0, 5);
+
+        // Loop through results and create HTML
+        for (var i = 0; i < displayServices.length; i++) {
+            var service = displayServices[i];
+            var item = document.createElement('a');
+            item.href = service.url;
+            item.className = 'search-result-item';
+
+            var imgUrl = service.image_url || 'https://via.placeholder.com/50';
+            var title = escapeHtml(service.title);
+            var rating = (service.rating || 0).toFixed(1);
+            var category = service.category || 'Service';
+            var price = Math.round(service.price || 0);
+
+            item.innerHTML =
+                '<div class="search-result-left">' +
+                '<img src="' + imgUrl + '" class="search-result-img" alt="' + title + '" onerror="this.src=\'https://via.placeholder.com/50\'">' +
+                '<div class="search-result-text">' +
+                '<div class="search-result-title">' + title + '</div>' +
+                '<div class="search-result-sub">' +
+                '<i class="bi bi-star-fill text-warning"></i>' + rating + ' • ' + category +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="search-result-price">₹' + price + '</div>';
+
+            searchResults.appendChild(item);
+        }
+
+        // Add "View All Results" link if more results exist
+        if (services.length > 5) {
+            var viewAll = document.createElement('a');
+            viewAll.href = browseUrl + '?search=' + encodeURIComponent(query);
+            viewAll.className = 'search-view-all';
+            viewAll.innerHTML = 'View all ' + services.length + ' results <i class="bi bi-arrow-right ms-1"></i>';
+            searchResults.appendChild(viewAll);
+        }
+
+        searchDropdown.style.display = 'block';
+        searchNoResults.style.display = 'none';
+    }
+
+    // Helper function to escape HTML (prevents XSS)
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show/Hide functions
+    function showSearchLoading() {
+        searchDropdown.style.display = 'block';
+        searchLoading.style.display = 'block';
+        searchResults.innerHTML = '';
+        searchNoResults.style.display = 'none';
+    }
+
+    function hideSearchLoading() {
+        searchLoading.style.display = 'none';
+    }
+
+    function showNoResults() {
+        searchDropdown.style.display = 'block';
+        searchNoResults.style.display = 'block';
+        searchResults.innerHTML = '';
+    }
+
+    function hideSearchDropdown() {
+        if (searchDropdown) {
+            searchDropdown.style.display = 'none';
+        }
+    }
+
+    // Legacy function for compatibility
+    function setHeroSearch(term) {
+        if (heroSearchInput) {
+            heroSearchInput.value = term;
+            performLiveSearch(term);
+        }
+    }
+
+    // Favorite Button Handler
+    function handleFavoriteClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var btn = e.currentTarget;
+        var serviceId = btn.getAttribute('data-service-id');
+        var icon = btn.querySelector('i');
+
+        fetch('/service/' + serviceId + '/favorite', { method: 'POST' })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                if (data.status === 'added') {
+                    icon.className = 'bi bi-heart-fill text-danger';
+                } else {
+                    icon.className = 'bi bi-heart text-danger';
+                }
+            })
+            .catch(function (error) {
+                console.error('Favorite Error:', error);
+            });
+    }
+
+    // Toggle FAQs
+    function toggleFaqs() {
+        var hiddenFaqs = document.querySelectorAll('.hidden-faq');
+        var btn = document.getElementById('seeAllFaqsBtn');
+        var isExpanded = btn.getAttribute('data-expanded') === 'true';
+
+        for (var i = 0; i < hiddenFaqs.length; i++) {
+            if (isExpanded) {
+                hiddenFaqs[i].classList.add('d-none');
+            } else {
+                hiddenFaqs[i].classList.remove('d-none');
+            }
+        }
+
+        if (isExpanded) {
+            btn.textContent = "See All FAQ's";
+            btn.setAttribute('data-expanded', 'false');
+        } else {
+            btn.textContent = "Show Less";
+            btn.setAttribute('data-expanded', 'true');
+        }
+    }
+
+    // FAQ Accordion Logic
+    document.addEventListener('DOMContentLoaded', function () {
+        var faqCards = document.querySelectorAll('.faq-card');
+
+        for (var i = 0; i < faqCards.length; i++) {
+            faqCards[i].addEventListener('click', function (e) {
+                // Ignore if clicking the toggle button itself (handled separately or bubbling)
+                // Actually, let's just make the whole card clickable
+
+                var content = this.querySelector('.faq-content');
+                var icon = this.querySelector('.toggle-btn i');
+
+                if (this.classList.contains('collapsed')) {
+                    // Collapse all others
+                    for (var j = 0; j < faqCards.length; j++) {
+                        if (faqCards[j] !== this && faqCards[j].classList.contains('expanded')) {
+                            faqCards[j].classList.remove('expanded');
+                            faqCards[j].classList.add('collapsed');
+                            faqCards[j].classList.remove('bg-gray-50');
+                            faqCards[j].classList.add('bg-white');
+                            var otherContent = faqCards[j].querySelector('.faq-content');
+                            if (otherContent) otherContent.classList.add('d-none');
+                            var otherIcon = faqCards[j].querySelector('.toggle-btn i');
+                            if (otherIcon) otherIcon.className = 'bi bi-chevron-down';
+                        }
+                    }
+
+                    // Expand this one
+                    this.classList.remove('collapsed');
+                    this.classList.add('expanded');
+                    this.classList.remove('bg-white');
+                    this.classList.add('bg-gray-50');
+                    if (content) content.classList.remove('d-none');
+                    if (icon) icon.className = 'bi bi-chevron-up';
+
+                } else {
+                    // Collapse this one
+                    this.classList.remove('expanded');
+                    this.classList.add('collapsed');
+                    this.classList.remove('bg-gray-50');
+                    this.classList.add('bg-white');
+                    if (content) content.classList.add('d-none');
+                    if (icon) icon.className = 'bi bi-chevron-down';
+                }
+            });
+        }
+    });
+
+    // Counter Animation
+    document.addEventListener('DOMContentLoaded', function () {
+        var counters = document.querySelectorAll('.counter');
+        for (var i = 0; i < counters.length; i++) {
+            (function (counter) {
+                var target = parseInt(counter.getAttribute('data-target'));
+                if (isNaN(target)) return;
+                var duration = 2000;
+                var step = target / (duration / 16);
+                var current = 0;
+
+                function updateCounter() {
+                    current += step;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target;
+                    }
+                }
+                updateCounter();
+            })(counters[i]);
+        }
+    });
+</script>
+{% endblock %}

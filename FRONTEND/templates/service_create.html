@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Service - SkillVerse{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 bg-light" style="margin-top: 60px;">
+    <!-- Header -->
+    <div class="bg-white border-bottom py-5">
+        <div class="container fade-in-up">
+            <h1 class="fw-bold mb-2">Create New Service</h1>
+            <p class="text-muted mb-0">Share your skills and start earning.</p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden fade-in-up delay-100">
+                    <div class="card-header bg-white border-0 py-4 px-4">
+                        <h5 class="fw-bold mb-0">Service Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{{ url_for('service.create') }}" class="needs-validation" novalidate
+                            enctype="multipart/form-data">
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Service Title
+                                    *</label>
+                                <input type="text" class="form-control bg-light border-0 py-3 text-dark fw-medium"
+                                    name="title"
+                                    placeholder="e.g. I will create a professional website for your business" required>
+                                <div class="invalid-feedback">Please enter a catchy title</div>
+                                <div class="form-text text-muted">Keep it short, clear, and catchy.</div>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <!-- Category -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Category *</label>
+                                    <select class="form-select bg-light border-0 py-3" name="category_id" required>
+                                        <option value="">Select a category</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Please select a category</div>
+                                </div>
+
+                                <!-- Delivery Time -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Estimated Delivery
+                                        *</label>
+                                    <select class="form-select bg-light border-0 py-3" name="delivery_time" required>
+                                        <option value="">Select duration</option>
+                                        <option value="1-2 days">1-2 days</option>
+                                        <option value="3-5 days">3-5 days</option>
+                                        <option value="5-7 days">5-7 days</option>
+                                        <option value="7-10 days">7-10 days</option>
+                                        <option value="10-14 days">10-14 days</option>
+                                        <option value="14-30 days">14-30 days</option>
+                                        <option value="Custom">Custom</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select delivery time</div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Description *</label>
+                                <textarea class="form-control bg-light border-0 py-3" name="description" rows="6"
+                                    placeholder="Describe your service in detail. What exactly will you provide?"
+                                    required></textarea>
+                                <div class="invalid-feedback">Please enter a description</div>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <!-- Price -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Price (INR)
+                                        *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0 py-3 text-muted">₹</span>
+                                        <input type="number" class="form-control bg-light border-0 py-3 fw-bold"
+                                            name="price" min="50" step="1" placeholder="500" required>
+                                    </div>
+                                    <div class="invalid-feedback">Please enter a valid price</div>
+                                </div>
+
+                                <!-- Tags -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Tags</label>
+                                    <input type="text" class="form-control bg-light border-0 py-3" name="tags"
+                                        placeholder="web design, logo, python">
+                                    <div class="form-text text-muted">Comma separated keywords.</div>
+                                </div>
+                            </div>
+
+                            <!-- Image -->
+                            <div class="mb-5">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Service Image</label>
+                                <div class="bg-light rounded-4 p-4 text-center border border-dashed hover-shadow transition-all position-relative overflow-hidden cursor-pointer"
+                                    style="min-height: 300px; display: flex; align-items: center; justify-content: center;"
+                                    onclick="document.getElementById('service-image-input').click()">
+                                    <div id="image-placeholder">
+                                        <i class="bi bi-cloud-arrow-up text-primary fs-1 mb-2"></i>
+                                        <p class="fw-medium text-dark mb-0">Click to upload image</p>
+                                        <p class="small text-muted mb-0">JPG or PNG, max 5MB</p>
+                                    </div>
+                                    <img id="image-preview" src=""
+                                        class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover d-none"
+                                        alt="Preview">
+                                </div>
+                                <input type="file" class="form-control position-absolute"
+                                    style="opacity: 0; height: 1px; width: 1px; bottom: 0; left: 50%;" name="image"
+                                    id="service-image-input" accept="image/*" required>
+                                <div class="invalid-feedback text-center" id="image-error-msg">Please select a service
+                                    image to proceed.</div>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="{{ url_for('user.dashboard') }}"
+                                    class="btn btn-light rounded-pill px-4 fw-bold">Cancel</a>
+                                <button type="submit"
+                                    class="btn btn-primary rounded-pill px-5 py-3 btn-sweep shadow-sm fw-bold">
+                                    Publish Service
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="card border-0 bg-primary bg-opacity-10 rounded-4 mt-4 fade-in-up delay-200">
+                    <div class="card-body p-4">
+                        <div class="d-flex">
+                            <i class="bi bi-lightbulb-fill text-primary fs-4 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-2">Tips for a Great Service</h6>
+                                <ul class="mb-0 text-muted small ps-3">
+                                    <li>Use a clear, catchy title that describes exactly what you do.</li>
+                                    <li>Add high-quality images to attract 3x more clients.</li>
+                                    <li>Be transparent about delivery time and pricing.</li>
+                                    <li>Use relevant tags to help users find your service easily.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+        border-color: #dee2e6 !important;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .hover-shadow:hover {
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+        background-color: #f8f9fa !important;
+    }
+</style>
+
+<script>
+    // Image preview
+    document.getElementById('service-image-input').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('image-preview');
+        const placeholder = document.getElementById('image-placeholder');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                preview.src = event.target.result;
+                preview.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            }
+            reader.readAsDataURL(file);
+        } else {
+            preview.classList.add('d-none');
+            placeholder.classList.remove('d-none');
+        }
+    });
+
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+<div id="askvera-widget" class="askvera-widget">
+    <!-- Speech Bubble -->
+    <div class="askvera-bubble">
+        <span>Happy to Assist</span>
+    </div>
+
+    <!-- Mascot Trigger -->
+    <button id="askvera-trigger" class="askvera-trigger" title="Chat with Vera">
+        <!-- Using a high quality 3D robot icon from Flaticon (CDN) -->
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Vera Robot" class="mascot-img">
+    </button>
+
+    <div id="askvera-window" class="askvera-window hidden">
+        <div class="askvera-header">
+            <div class="askvera-title">
+                <h4><i class="bi bi-robot"></i> AskVera AI</h4>
+                <span><span class="askvera-status-dot"></span> Online</span>
+            </div>
+            <button id="askvera-close"
+                style="background:none;border:none;color:white;opacity:0.8;font-size:1.5rem;cursor:pointer;">&times;</button>
+        </div>
+
+        <div id="askvera-messages" class="askvera-messages">
+            <!-- Welcome Message -->
+            <div class="message-wrapper ai">
+                <div class="message-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message">
+                    Hi there! I'm Vera, your AI assistant. How can I help you today?
+                </div>
+            </div>
+        </div>
+
+        <div class="askvera-input-area">
+            <div class="input-wrapper">
+                <input type="text" id="askvera-input" class="form-control shadow-none" placeholder="Type a message..."
+                    autocomplete="off">
+                <button id="askvera-send" title="Send">
+                    <i class="bi bi-send-fill" style="font-size: 14px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

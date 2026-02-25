@@ -1,0 +1,742 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Availability - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+<style>
+    :root {
+        --planner-bg: #f8fafc;
+        --planner-card-bg: #ffffff;
+        --planner-border: #e2e8f0;
+        --primary-color: #4f46e5;
+        --secondary-color: #64748b;
+        --success-soft: #d1fae5;
+        --success-text: #065f46;
+        --warning-soft: #fef3c7;
+        --warning-text: #92400e;
+        --info-soft: #e0e7ff;
+        --info-text: #3730a3;
+    }
+
+    body {
+        background-color: var(--planner-bg);
+    }
+
+    /* Dark Mode Palette overrides */
+    [data-bs-theme="dark"] {
+        --planner-bg: #0f172a;
+        --planner-card-bg: #1e293b;
+        --planner-border: #334155;
+        --primary-color: #818cf8;
+        --secondary-color: #94a3b8;
+        --success-soft: rgba(6, 95, 70, 0.4);
+        --success-text: #6ee7b7;
+        --warning-soft: rgba(146, 64, 14, 0.4);
+        --warning-text: #fcd34d;
+        --info-soft: rgba(55, 48, 163, 0.4);
+        --info-text: #a5b4fc;
+    }
+
+    [data-bs-theme="dark"] .page-header {
+        background-color: var(--planner-card-bg);
+        border-bottom-color: var(--planner-border);
+    }
+
+    [data-bs-theme="dark"] .page-header h1 {
+        color: #f1f5f9;
+    }
+
+    [data-bs-theme="dark"] .page-header p {
+        color: #94a3b8 !important;
+    }
+
+    [data-bs-theme="dark"] .request-table th {
+        background-color: #1e293b;
+        color: #94a3b8;
+    }
+
+    [data-bs-theme="dark"] .d-flex.align-items-center.p-3.border-bottom {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-bottom-color: var(--planner-border) !important;
+    }
+
+    [data-bs-theme="dark"] .d-flex.align-items-center.p-3.border-bottom h6 {
+        color: #f1f5f9 !important;
+    }
+
+    [data-bs-theme="dark"] .fc-col-header-cell,
+    [data-bs-theme="dark"] .fc-timegrid-axis-frame,
+    [data-bs-theme="dark"] .fc-scrollgrid-sync-inner {
+        background-color: #1e293b;
+    }
+
+
+    [data-bs-theme="dark"] .fc-col-header-cell-cushion {
+        color: #cbd5e1;
+    }
+
+    [data-bs-theme="dark"] .modal-header,
+    [data-bs-theme="dark"] .modal-content {
+        background-color: var(--planner-card-bg);
+        border-color: var(--planner-border);
+        color: #f1f5f9;
+    }
+
+    [data-bs-theme="dark"] .form-control,
+    [data-bs-theme="dark"] .form-select {
+        background-color: #0f172a;
+        border-color: var(--planner-border);
+        color: #f1f5f9;
+    }
+
+    [data-bs-theme="dark"] .text-dark {
+        color: #f1f5f9 !important;
+    }
+
+    [data-bs-theme="dark"] .bg-light {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #e2e8f0 !important;
+    }
+
+    [data-bs-theme="dark"] .text-muted,
+    [data-bs-theme="dark"] .text-secondary {
+        color: #94a3b8 !important;
+    }
+
+    /* Modal Buttons in Dark Mode */
+    [data-bs-theme="dark"] .btn-light {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.05);
+        color: #f8fafc;
+    }
+
+    [data-bs-theme="dark"] .btn-light:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+
+    /* FullCalendar Axis/Time Labels */
+    [data-bs-theme="dark"] .fc-timegrid-slot-label-cushion,
+    [data-bs-theme="dark"] .fc-scrollgrid-shrink-cushion {
+        color: #cbd5e1 !important;
+    }
+
+    [data-bs-theme="dark"] .fc-theme-standard td,
+    [data-bs-theme="dark"] .fc-theme-standard th,
+    [data-bs-theme="dark"] .fc-theme-standard .fc-scrollgrid {
+        border-color: var(--planner-border);
+    }
+
+    /* Elegant Header */
+    .page-header {
+        background: white;
+        color: var(--primary-color);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--planner-border);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .page-header h1 {
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: #1e293b;
+    }
+
+    /* Professional Card styling */
+    .planner-card {
+        background: var(--planner-card-bg);
+        border: 1px solid var(--planner-border);
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    .planner-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.01);
+    }
+
+    /* Statistics / Legend Pills */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+    }
+
+    .status-pill.available {
+        background-color: var(--success-soft);
+        color: var(--success-text);
+        border-color: #a7f3d0;
+    }
+
+    .status-pill.pending {
+        background-color: var(--warning-soft);
+        color: var(--warning-text);
+        border-color: #fde68a;
+    }
+
+    .status-pill.confirmed {
+        background-color: var(--info-soft);
+        color: var(--info-text);
+        border-color: #c7d2fe;
+    }
+
+    .status-dot {
+        height: 0.5rem;
+        width: 0.5rem;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        background-color: currentColor;
+    }
+
+    /* Pending Request Table Styling */
+    .request-table th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--secondary-color);
+        background-color: #f8fafc;
+        border-bottom: 1px solid var(--planner-border);
+        padding: 1rem 1.5rem;
+    }
+
+    .request-table td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--planner-border);
+        font-size: 0.95rem;
+    }
+
+    .request-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* FullCalendar Overrides for "Planner" Look */
+    .fc {
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    .fc-theme-standard .fc-scrollgrid {
+        border: 1px solid var(--planner-border);
+        border-radius: 0.75rem;
+    }
+
+    .fc-col-header-cell,
+    .fc-timegrid-axis-frame {
+        background-color: #f8fafc;
+        padding: 1rem 0;
+    }
+
+
+    .fc-col-header-cell-cushion {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #475569;
+    }
+
+    .fc-timegrid-slot-label-cushion {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .fc-event {
+        border: none !important;
+        border-radius: 4px;
+        padding: 4px 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+
+    /* Modal Polish */
+    .modal-content {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--planner-border);
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        border-radius: 1rem 1rem 0 0;
+    }
+
+    .form-control:focus,
+    .form-check-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Robust Event Styling Classes */
+    .fc-event.event-available {
+        background-color: var(--success-soft) !important;
+        border: 1px solid transparent;
+        border-color: rgba(16, 185, 129, 0.2);
+        border-left: 4px solid #10b981 !important;
+        color: var(--success-text) !important;
+    }
+
+    .fc-event.event-pending {
+        background-color: var(--warning-soft) !important;
+        border: 1px solid transparent;
+        border-color: rgba(245, 158, 11, 0.2);
+        border-left: 4px solid #f59e0b !important;
+        color: var(--warning-text) !important;
+    }
+
+    .fc-event.event-confirmed {
+        background-color: var(--info-soft) !important;
+        border: 1px solid transparent;
+        border-color: rgba(99, 102, 241, 0.2);
+        border-left: 4px solid #4f46e5 !important;
+        color: var(--info-text) !important;
+    }
+
+    /* Ensure text inside events inherits the high-contrast color */
+    .fc-event .fc-event-main,
+    .fc-event .fc-event-title,
+    .fc-event .fc-event-time {
+        color: inherit !important;
+        font-weight: 600;
+    }
+
+    [data-bs-theme="dark"] .fc-event.event-available {
+        border-color: #064e3b;
+    }
+
+    [data-bs-theme="dark"] .fc-event.event-pending {
+        border-color: #78350f;
+    }
+
+    [data-bs-theme="dark"] .fc-event.event-confirmed {
+        border-color: #312e81;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Add top margin to account for fixed navbar -->
+<div style="margin-top: 80px;"></div>
+
+<!-- Header Section -->
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-6 mb-1">Teacher's Planner</h1>
+                <p class="text-secondary mb-0">Manage your schedule and student sessions efficiently.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Controls Toolbar -->
+    <div class="planner-card p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex gap-3 px-2">
+            <div class="status-pill available">
+                <div class="status-dot"></div> Available
+            </div>
+            <div class="status-pill pending">
+                <div class="status-dot"></div> Pending Review
+            </div>
+            <div class="status-pill confirmed">
+                <div class="status-dot"></div> Confirmed Session
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal"
+                data-bs-target="#addSlotModal" onclick="resetForm()">
+                <i class="bi bi-plus-lg me-2"></i>New Availability
+            </button>
+        </div>
+    </div>
+
+    <!-- Pending Requests Section -->
+    {% if pending_bookings %}
+    <div class="planner-card mb-4 fade-in-up">
+        <div class="d-flex align-items-center p-3 border-bottom bg-light bg-opacity-50">
+            <i class="bi bi-inbox-fill text-warning fs-5 me-2"></i>
+            <h6 class="fw-bold mb-0 text-dark">Inbox: Pending Requests</h6>
+            <span class="badge bg-warning text-dark ms-2 rounded-pill">{{ pending_bookings|length }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table request-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Student</th>
+                        <th style="width: 25%;">Requested Slot</th>
+                        <th style="width: 20%;">Service Type</th>
+                        <th style="width: 15%;">Notes</th>
+                        <th class="text-end" style="width: 15%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in pending_bookings %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ booking.client.get_avatar_url() }}" class="rounded-circle me-3" width="36"
+                                    height="36" style="border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div>
+                                    <div class="fw-bold text-dark">{{ booking.client.username }}</div>
+                                    <div class="small text-muted">New Student</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-medium text-dark">{{ booking.slot.start_time.strftime('%b %d') }}</span>
+                                <span class="small text-muted">{{ booking.slot.start_time.strftime('%H:%M') }} - {{
+                                    booking.slot.end_time.strftime('%H:%M') }} (UTC)</span>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ booking.service.title if booking.service
+                                else 'General Session' }}</span></td>
+                        <td><small class="text-secondary fst-italic">{{ booking.notes or 'No notes provided' }}</small>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group shadow-sm rounded-pill" role="group">
+                                <form action="{{ url_for('availability.approve_booking', booking_id=booking.id) }}"
+                                    method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token }}">
+                                    <button type="submit" class="btn btn-sm btn-success ps-3 pe-2" title="Approve">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('availability.reject_booking', booking_id=booking.id) }}"
+                                    method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token }}">
+                                    <button type="submit"
+                                        class="btn btn-sm btn-light border-start ps-2 pe-3 text-danger hover-danger"
+                                        title="Reject">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Calendar Container -->
+    <div class="planner-card p-4">
+        <div id='calendar'></div>
+    </div>
+</div>
+
+<!-- Add Slot Modal -->
+<div class="modal fade" id="addSlotModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold">Add Availability</h5>
+                    <p class="text-muted small mb-0">Create open slots for bookings</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="addSlotForm">
+                    <div class="alert alert-light border d-flex align-items-start gap-3 rounded-3 mb-4">
+                        <i class="bi bi-info-circle-fill text-primary mt-1"></i>
+                        <small class="text-muted">Slots are stored in UTC but displayed in your local time zone.</small>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-uppercase small text-muted">Start</label>
+                            <input type="datetime-local" class="form-control bg-light border-0" id="startTime" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-uppercase small text-muted">End</label>
+                            <input type="datetime-local" class="form-control bg-light border-0" id="endTime" required>
+                        </div>
+                    </div>
+
+                    <div
+                        class="form-check form-switch bg-light p-3 rounded-3 d-flex align-items-center justify-content-between ps-4 pe-3">
+                        <label class="form-check-label fw-bold mb-0" for="isRecurring">
+                            Repeat Weekly
+                            <span class="d-block small fw-normal text-muted mt-1">Create for next 12 weeks</span>
+                        </label>
+                        <input class="form-check-input ms-0" type="checkbox" id="isRecurring"
+                            style="width: 3em; height: 1.5em;">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" id="saveSlotBtn">Save Slots</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Slot Modal -->
+<div class="modal fade" id="deleteSlotModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body p-5 text-center">
+                <div class="mb-4 text-danger">
+                    <i class="bi bi-trash3 display-1"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Remove Slot?</h4>
+                <p class="text-muted mb-4">Are you sure you want to remove this availability slot? This action cannot be
+                    undone.</p>
+
+                <div id="deleteWarning"
+                    class="alert alert-warning border-0 bg-warning bg-opacity-10 text-warning d-none mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> This slot is already booked!
+                </div>
+
+
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+    function resetForm() {
+        document.getElementById('addSlotForm').reset();
+        // Set default start time to next hour
+        const now = new Date();
+        now.setMinutes(0, 0, 0);
+        now.setHours(now.getHours() + 1);
+
+        // Use local time for input
+        const startStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('startTime').value = startStr;
+
+        now.setHours(now.getHours() + 1);
+        const endStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('endTime').value = endStr;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var addModal = new bootstrap.Modal(document.getElementById('addSlotModal'));
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteSlotModal'));
+        var selectedInfo = null;
+        var selectedEvent = null;
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            timeZone: 'local',
+            allDaySlot: false,
+            slotMinTime: '08:00:00',
+            slotMaxTime: '22:00:00',
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            selectable: true,
+            selectMirror: true,
+            editable: false,
+            dayMaxEvents: true,
+            events: '/availability/api/slots',
+
+            // Apply classes instead of inline styles
+            eventDidMount: function (info) {
+                applyEventClasses(info.event, info.el);
+            },
+
+            select: function (info) {
+                selectedInfo = info;
+                const start = info.start;
+                const end = info.end;
+
+                const startStr = new Date(start.getTime() - (start.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                const endStr = new Date(end.getTime() - (end.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+
+                document.getElementById('startTime').value = startStr;
+                document.getElementById('endTime').value = endStr;
+                document.getElementById('isRecurring').checked = false;
+
+                addModal.show();
+            },
+
+            eventClick: function (info) {
+                selectedEvent = info.event;
+
+                document.getElementById('deleteWarning').classList.add('d-none');
+                document.getElementById('confirmDeleteBtn').disabled = false;
+
+                if (selectedEvent.extendedProps.is_booked) {
+                    document.getElementById('deleteWarning').classList.remove('d-none');
+                    document.getElementById('confirmDeleteBtn').disabled = true;
+                }
+
+
+
+                deleteModal.show();
+            },
+
+        });
+
+        calendar.render();
+
+        // Helper function for event classes
+        function applyEventClasses(event, el) {
+            // Remove any existing status classes first
+            el.classList.remove('event-available', 'event-pending', 'event-confirmed');
+
+            if (event.extendedProps.is_booked) {
+                if (event.extendedProps.status === 'pending') {
+                    el.classList.add('event-pending');
+                } else {
+                    el.classList.add('event-confirmed');
+                }
+            } else {
+                el.classList.add('event-available');
+            }
+        }
+
+        // No need for MutationObserver for colors anymore! 
+        // CSS Variables handle the theme switch automatically.
+
+
+        // Handle Save Slot
+        document.getElementById('saveSlotBtn').addEventListener('click', function () {
+            const start = document.getElementById('startTime').value;
+            const end = document.getElementById('endTime').value;
+            const isRecurring = document.getElementById('isRecurring').checked;
+
+            if (!start || !end) {
+                alert('Please select both start and end times');
+                return;
+            }
+
+            if (new Date(start) < new Date()) {
+                alert('Cannot create availability slots in the past.');
+                return;
+            }
+
+            if (new Date(start) >= new Date(end)) {
+                alert('End time must be after start time');
+                return;
+            }
+
+            const startTime = new Date(start);
+            const endTime = new Date(end);
+            const sHour = startTime.getHours();
+            const eHour = endTime.getHours();
+            const eMin = endTime.getMinutes();
+
+            if (sHour < 8 || (eHour > 21) || (eHour === 21 && eMin > 0)) {
+                alert('Availability must be between 8 AM and 9 PM');
+                return;
+            }
+
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            btn.disabled = true;
+
+            fetch('/availability/api/slots/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token() if csrf_token else '' }}"
+                },
+                body: JSON.stringify({
+                    start: new Date(start).toISOString(),
+                    end: new Date(end).toISOString(),
+                    is_recurring: isRecurring
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+
+                    if (data.status === 'success') {
+                        calendar.refetchEvents();
+                        addModal.hide();
+
+                        if (isRecurring) {
+                            const result = data.result;
+                            // Use a toast or nicer alert
+                            alert(`Successfully created ${result.created} recurring slots!`);
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('An error occurred');
+                });
+        });
+
+        // Handle Delete Slot
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            if (!selectedEvent) return;
+
+            fetch(`/availability/api/slots/${selectedEvent.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': "{{ csrf_token() if csrf_token else '' }}"
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        selectedEvent.remove();
+                        deleteModal.hide();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+        });
+    });
+
+    // Observer for Theme Changes to update Calendar events color dynamically
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.type === "attributes" && mutation.attributeName === "data-bs-theme") {
+                // We need to access the calendar instance. 
+                // Since 'calendar' var is local to the DOMContentLoaded scope,
+                // we'll dispatch a custom event that the inner scope listens to, or just make calendar accessible.
+                // Simpler approach: Re-click the currently active view tab to force render or use a global var mechanism if possible.
+                // But since we can't easily access 'calendar' variable here if it's not global:
+                // Let's move this observer INSIDE the DOMContentLoaded event where 'calendar' is defined.
+            }
+        });
+    });
+</script>
+{% endblock %}

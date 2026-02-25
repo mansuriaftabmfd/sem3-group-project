@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillVerse Project Learning Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 40px;
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+        }
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .section h3 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+            font-size: 1.4em;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        tr:hover {
+            background: #e9ecef;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 5px 5px 5px 0;
+        }
+        .badge-primary { background: #667eea; color: white; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-info { background: #17a2b8; color: white; }
+        .badge-warning { background: #ffc107; color: #000; }
+        .badge-danger { background: #dc3545; color: white; }
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .flow-step {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        ul, ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .toc h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .toc a {
+            color: #764ba2;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+        }
+        .toc a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 SkillVerse Project Learning Guide</h1>
+            <p>Complete Flask Application Architecture & Database Structure</p>
+        </div>
+
+        <div class="content">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>📚 Table of Contents</h3>
+                <a href="#overview">1. Project Overview</a>
+                <a href="#flask-concepts">2. Flask Concepts Used</a>
+                <a href="#database">3. Database Structure</a>
+                <a href="#tables">4. Database Tables Detail</a>
+                <a href="#code-flow">5. Code Flow & Architecture</a>
+                <a href="#features">6. Key Features Implementation</a>
+            </div>
+
+            <!-- Section 1: Overview -->
+            <div class="section" id="overview">
+                <h2>1. 📋 Project Overview</h2>
+                <p><strong>Project Name:</strong> SkillVerse</p>
+                <p><strong>Type:</strong> Skill Marketplace Platform (Freelancing/Service Platform)</p>
+                <p><strong>Technology Stack:</strong></p>
+                <div class="badge badge-primary">Python Flask</div>
+                <div class="badge badge-success">PostgreSQL</div>
+                <div class="badge badge-info">SQLAlchemy ORM</div>
+                <div class="badge badge-warning">Flask-SocketIO</div>
+                <div class="badge badge-danger">Groq AI</div>
+                
+                <h3>Main Purpose:</h3>
+                <ul>
+                    <li>Connect service providers (sellers) with clients (buyers)</li>
+                    <li>Manage service listings, orders, and payments</li>
+                    <li>Handle bookings and availability scheduling</li>
+                    <li>Issue certificates upon service completion</li>
+                    <li>Real-time chat between buyers and sellers</li>
+                </ul>
+            </div>
+
+            <!-- Section 2: Flask Concepts -->
+            <div class="section" id="flask-concepts">
+                <h2>2. 🔥 Flask Concepts Used in Project</h2>
+                
+                <h3>2.1 Application Factory Pattern</h3>
+                <div class="code-block">
+# app.py
+def create_app(config_name='default'):
+    app = Flask(__name__)
+    # Configuration and initialization
+    return app
+                </div>
+                <p><strong>Location:</strong> app.py → create_app() function</p>
+                <p><strong>Purpose:</strong> Creates multiple app instances with different configurations</p>
+
+                <h3>2.2 Blueprints (Modular Routes)</h3>
+                <div class="code-block">
+# routes.py
+main_bp = Blueprint('main', __name__)
+auth_bp = Blueprint('auth', __name__)
+service_bp = Blueprint('service', __name__)
+user_bp = Blueprint('user', __name__)
+admin_bp = Blueprint('admin', __name__)
+api_bp = Blueprint('api', __name__)
+availability_bp = Blueprint('availability', __name__)
+
+# routes_chat.py
+chat_bp = Blueprint('chat', __name__)
+                </div>
+                <p><strong>Total Blueprints:</strong> 8</p>
+                <p><strong>Purpose:</strong> Organize routes into logical modules</p>
+
+                <h3>2.3 Flask Extensions Used</h3>
+                <table>
+                    <tr>
+                        <th>Extension</th>
+                        <th>File</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td>Flask-SQLAlchemy</td>
+                        <td>models.py</td>
+                        <td>Database ORM</td>
+                    </tr>
+                    <tr>
+                        <td>Flask-Login</td>
+                        <td>extensions.py</td>
+                        <td>User authentication & session management</td>
+                    </tr>
+                    <tr>
+                        <td>Flask-SocketIO</td>
+                        <td>extensions.py, events.py</td>
+                        <td>Real-time chat & notifications</td>
+                    </tr>
+                    <tr>
+                        <td>Flask-Mail</td>
+                        <td>email_utils.py</td>
+                        <td>Send emails (order confirmations, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td>Flask-WTF</td>
+                        <td>Throughout templates</td>
+                        <td>Form handling & CSRF protection</td>
+                    </tr>
+                    <tr>
+                        <td>Authlib</td>
+                        <td>routes.py (OAuth)</td>
+                        <td>Google OAuth login</td>
+                    </tr>
+                </table>
+
+                <h3>2.4 Configuration Management</h3>
+                <div class="code-block">
+# config.py
+class Config:  # Base configuration
+class DevelopmentConfig(Config):  # Development settings
+class ProductionConfig(Config):  # Production settings
+class TestingConfig(Config):  # Testing settings
+                </div>
+                <p><strong>File:</strong> config.py</p>
+                <p><strong>Concept:</strong> Inheritance - Different configs for different environments</p>
+            </div>
+
+            <!-- Section 3: Database -->
+            <div class="section" id="database">
+                <h2>3. 💾 Database Structure</h2>
+                
+                <h3>Database Type</h3>
+                <div class="highlight">
+                    <strong>Primary Database:</strong> PostgreSQL (Production)<br>
+                    <strong>Alternative:</strong> SQLite (Development/Testing)<br>
+                    <strong>ORM:</strong> SQLAlchemy
+                </div>
+
+                <h3>Total Tables: 16</h3>
+                <ol>
+                    <li>users</li>
+                    <li>categories</li>
+                    <li>services</li>
+                    <li>orders</li>
+                    <li>reviews</li>
+                    <li>favorites</li>
+                    <li>notifications</li>
+                    <li>messages</li>
+                    <li>transactions</li>
+                    <li>availability_slots</li>
+                    <li>bookings</li>
+                    <li>certificates</li>
+                    <li>project_showcase</li>
+                    <li>testimonials</li>
+                    <li>contact_messages</li>
+                    <li>hidden_chats</li>
+                </ol>
+            </div>
+
+            <!-- Section 4: Tables Detail -->
+            <div class="section" id="tables">
+                <h2>4. 📊 Database Tables Detail</h2>
+
+                <h3>Table 1: users</h3>
+                <p><strong>Purpose:</strong> Store all user information (clients, providers, admin)</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>id</td>
+                            <td>INTEGER (PK)</td>
+                            <td>Unique user ID</td>
+                        </tr>
+                        <tr>
+                            <td>username</td>
+                            <td>VARCHAR(80)</td>
+                            <td>Unique username</td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>VARCHAR(120)</td>
+                            <td>Unique email address</td>
+                        </tr>
+                        <tr>
+                            <td>password_hash</td>
+                            <td>VARCHAR(255)</td>
+                            <td>Encrypted password</td>
+                        </tr>
+                        <tr>
+                            <td>user_type</td>
+                            <td>VARCHAR(20)</td>
+                            <td>'client', 'provider', or 'admin'</td>
+                        </tr>
+                        <tr>
+                            <td>full_name</td>
+                            <td>VARCHAR(100)</td>
+                            <td>User's full name</td>
+                        </tr>
+                        <tr>
+                            <td>bio</td>
+                            <td>TEXT</td>
+                            <td>User biography</td>
+                        </tr>
+                        <tr>
+                            <td>avatar_url</td>
+                            <td>VARCHAR(255)</td>
+                            <td>Profile picture path</td>
+                        </tr>
+                        <tr>
+                            <td>phone</td>
+                            <td>VARCHAR(20)</td>
+                            <td>Contact number</td>
+                        </tr>
+                        <tr>
+                            <td>wallet_balance</td>
+                            <td>FLOAT</td>
+                            <td>Current wallet balance (₹)</td>
+                        </tr>
+                        <tr>
+                            <td>is_active</td>
+                            <td>BOOLEAN</td>
+                            <td>Account active status</td>
+                        </tr>
+                        <tr>
+                            <td>is_verified</td>
+                            <td>BOOLEAN</td>
+                            <td>Email verification status</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td>TIMESTAMP</td>
+                            <td>Registration date</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Table 2: categories</h3>
+                <p><strong>Purpose:</strong> Service categories (Web Dev, Design, etc.)</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Category ID</td></tr>
+                        <tr><td>name</td><td>VARCHAR(100)</td><td>Category name (unique)</td></tr>
+                        <tr><td>description</td><td>TEXT</td><td>Category description</td></tr>
+                        <tr><td>icon</td><td>VARCHAR(50)</td><td>Bootstrap icon class</td></tr>
+                        <tr><td>color</td><td>VARCHAR(50)</td><td>Display color class</td></tr>
+                        <tr><td>created_at</td><td>TIMESTAMP</td><td>Creation date</td></tr>
+                    </table>
+                </div>
+
+                <h3>Table 3: services</h3>
+                <p><strong>Purpose:</strong> Service listings created by providers</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Service ID</td></tr>
+                        <tr><td>title</td><td>VARCHAR(200)</td><td>Service title</td></tr>
+                        <tr><td>description</td><td>TEXT</td><td>Service description</td></tr>
+                        <tr><td>price</td><td>FLOAT</td><td>Service price (₹)</td></tr>
+                        <tr><td>delivery_time</td><td>VARCHAR(50)</td><td>Delivery timeframe</td></tr>
+                        <tr><td>user_id</td><td>INTEGER (FK)</td><td>Provider user ID</td></tr>
+                        <tr><td>category_id</td><td>INTEGER (FK)</td><td>Category ID</td></tr>
+                        <tr><td>image_url</td><td>VARCHAR(255)</td><td>Service image path</td></tr>
+                        <tr><td>tags</td><td>VARCHAR(255)</td><td>Search tags</td></tr>
+                        <tr><td>is_active</td><td>BOOLEAN</td><td>Service active status</td></tr>
+                        <tr><td>is_approved</td><td>BOOLEAN</td><td>Admin approval status</td></tr>
+                        <tr><td>rejection_reason</td><td>VARCHAR(500)</td><td>Admin rejection reason</td></tr>
+                        <tr><td>view_count</td><td>INTEGER</td><td>Total views</td></tr>
+                        <tr><td>created_at</td><td>TIMESTAMP</td><td>Creation date</td></tr>
+                    </table>
+                </div>
+
+                <h3>Table 4: orders</h3>
+                <p><strong>Purpose:</strong> Track service orders/purchases</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Order ID</td></tr>
+                        <tr><td>service_id</td><td>INTEGER (FK)</td><td>Service being ordered</td></tr>
+                        <tr><td>buyer_id</td><td>INTEGER (FK)</td><td>Client user ID</td></tr>
+                        <tr><td>seller_id</td><td>INTEGER (FK)</td><td>Provider user ID</td></tr>
+                        <tr><td>total_price</td><td>FLOAT</td><td>Order amount (₹)</td></tr>
+                        <tr><td>status</td><td>VARCHAR(20)</td><td>'pending', 'in_progress', 'completed', 'cancelled'</td></tr>
+                        <tr><td>requirements</td><td>TEXT</td><td>Buyer's requirements</td></tr>
+                        <tr><td>scope</td><td>TEXT</td><td>Project scope</td></tr>
+                        <tr><td>budget_tier</td><td>VARCHAR(20)</td><td>Basic/Standard/Premium</td></tr>
+                        <tr><td>deadline</td><td>TIMESTAMP</td><td>Agreed deadline</td></tr>
+                        <tr><td>delivery_note</td><td>TEXT</td><td>Seller's delivery note</td></tr>
+                        <tr><td>rejection_reason</td><td>TEXT</td><td>Order rejection reason (mandatory)</td></tr>
+                        <tr><td>created_at</td><td>TIMESTAMP</td><td>Order placed date</td></tr>
+                        <tr><td>completed_at</td><td>TIMESTAMP</td><td>Completion date</td></tr>
+                    </table>
+                </div>
+
+                <h3>Table 5: transactions</h3>
+                <p><strong>Purpose:</strong> Track all wallet transactions (credit/debit)</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Transaction ID</td></tr>
+                        <tr><td>txn_id</td><td>VARCHAR(50)</td><td>Unique transaction reference</td></tr>
+                        <tr><td>user_id</td><td>INTEGER (FK)</td><td>User ID</td></tr>
+                        <tr><td>username</td><td>VARCHAR(80)</td><td>Username for display</td></tr>
+                        <tr><td>amount</td><td>FLOAT</td><td>Transaction amount (₹)</td></tr>
+                        <tr><td>method</td><td>VARCHAR(20)</td><td>'card', 'wallet', 'upi', 'refund'</td></tr>
+                        <tr><td>status</td><td>VARCHAR(20)</td><td>'success', 'failed'</td></tr>
+                        <tr><td>txn_type</td><td>VARCHAR(10)</td><td>'debit' or 'credit'</td></tr>
+                        <tr><td>description</td><td>TEXT</td><td>Transaction description</td></tr>
+                        <tr><td>new_balance</td><td>FLOAT</td><td>Balance after transaction</td></tr>
+                        <tr><td>timestamp</td><td>TIMESTAMP</td><td>Transaction time</td></tr>
+                    </table>
+                </div>
+
+                <h3>Table 6: certificates</h3>
+                <p><strong>Purpose:</strong> Store issued certificates after order completion</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Certificate ID</td></tr>
+                        <tr><td>cert_id</td><td>VARCHAR(20)</td><td>Unique certificate code (e.g., CERT-ABC123)</td></tr>
+                        <tr><td>order_id</td><td>INTEGER (FK)</td><td>Related order ID</td></tr>
+                        <tr><td>student_id</td><td>INTEGER (FK)</td><td>Client/student user ID</td></tr>
+                        <tr><td>provider_id</td><td>INTEGER (FK)</td><td>Provider/instructor user ID</td></tr>
+                        <tr><td>skill_name</td><td>VARCHAR(200)</td><td>Skill/service name</td></tr>
+                        <tr><td>pdf_filename</td><td>VARCHAR(255)</td><td>PDF file path</td></tr>
+                        <tr><td>issued_at</td><td>TIMESTAMP</td><td>Issue date</td></tr>
+                    </table>
+                </div>
+
+                <h3>Table 7: availability_slots</h3>
+                <p><strong>Purpose:</strong> Provider's available time slots for bookings</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Slot ID</td></tr>
+                        <tr><td>provider_id</td><td>INTEGER (FK)</td><td>Provider user ID</td></tr>
+                        <tr><td>start_time</td><td>TIMESTAMP</td><td>Slot start time</td></tr>
+                        <tr><td>end_time</td><td>TIMESTAMP</td><td>Slot end time</td></tr>
+                        <tr><td>is_booked</td><td>BOOLEAN</td><td>Booking status</td></tr>
+                        <tr><td>created_at</td><td>TIMESTAMP</td><td>Creation date</td></tr>
+                    </table>
+                </div>
+
+                <h3>Table 8: bookings</h3>
+                <p><strong>Purpose:</strong> Track session bookings</p>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr><td>id</td><td>INTEGER (PK)</td><td>Booking ID</td></tr>
+                        <tr><td>slot_id</td><td>INTEGER (FK)</td><td>Availability slot ID</td></tr>
+                        <tr><td>client_id</td><td>INTEGER (FK)</td><td>Client user ID</td></tr>
+                        <tr><td>service_id</td><td>INTEGER (FK)</td><td>Service ID</td></tr>
+                        <tr><td>order_id</td><td>INTEGER (FK)</td><td>Related order ID</td></tr>
+                        <tr><td>status</td><td>VARCHAR(20)</td><td>'pending', 'confirmed', 'cancelled', 'rejected'</td></tr>
+                        <tr><td>notes</td><td>TEXT</td><td>Booking notes</td></tr>
+                        <tr><td>created_at</td><td>TIMESTAMP</td><td>Booking date</td></tr>
+                    </table>
+                </div>
+
+                <h3>Other Important Tables (Summary)</h3>
+                <ul>
+                    <li><strong>reviews:</strong> Service ratings and reviews (rating, comment, service_id, user_id)</li>
+                    <li><strong>favorites:</strong> User's favorite services (user_id, service_id)</li>
+                    <li><strong>notifications:</strong> User notifications (title, message, link, is_read)</li>
+                    <li><strong>messages:</strong> Chat messages between buyer and seller (order_id, sender_id, content)</li>
+                    <li><strong>project_showcase:</strong> Provider's portfolio items (title, description, image_url)</li>
+                    <li><strong>testimonials:</strong> User testimonials (content, role, rating)</li>
+                    <li><strong>contact_messages:</strong> Contact form submissions (name, email, subject, message)</li>
+                    <li><strong>hidden_chats:</strong> Hidden chat conversations (user_id, order_id)</li>
+                </ul>
+            </div>
+
+            <!-- Section 5: Code Flow -->
+            <div class="section" id="code-flow">
+                <h2>5. 🔄 Code Flow & Architecture</h2>
+
+                <h3>5.1 Application Startup Flow</h3>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>Step 1:</strong> Load environment variables (.env file)
+                        <div class="code-block">load_dotenv()</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 2:</strong> Create Flask app using factory pattern
+                        <div class="code-block">app = create_app('development')</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 3:</strong> Load configuration (config.py)
+                        <div class="code-block">app.config.from_object(DevelopmentConfig)</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 4:</strong> Initialize extensions (SQLAlchemy, Flask-Login, SocketIO, etc.)
+                        <div class="code-block">db.init_app(app)
+login_manager.init_app(app)
+socketio.init_app(app)</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 5:</strong> Register blueprints (routes)
+                        <div class="code-block">app.register_blueprint(main_bp)
+app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(service_bp, url_prefix='/service')</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 6:</strong> Create database tables
+                        <div class="code-block">db.create_all()</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 7:</strong> Run migrations (add missing columns)
+                        <div class="code-block">run_migrations(app)</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 8:</strong> Create default admin user
+                        <div class="code-block">create_default_admin(app)</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>Step 9:</strong> Start server with SocketIO
+                        <div class="code-block">socketio.run(app, host='0.0.0.0', port=5000)</div>
+                    </div>
+                </div>
+
+                <h3>5.2 Request-Response Flow (Example: Place Order)</h3>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>1. User Action:</strong> Client clicks "Place Order" button
+                    </div>
+                    <div class="flow-step">
+                        <strong>2. Route:</strong> POST /service/&lt;service_id&gt;/order
+                        <div class="code-block">@service_bp.route('/&lt;int:service_id&gt;/order', methods=['POST'])</div>
+                    </div>
+                    <div class="flow-step">
+                        <strong>3. Authentication Check:</strong> @login_required decorator
+                    </div>
+                    <div class="flow-step">
+                        <strong>4. Validation:</strong> Check wallet balance, service availability
+                    </div>
+                    <div class="flow-step">
+                        <strong>5. Payment Processing:</strong>
+                        <ul>
+                            <li>Deduct from buyer wallet (100%)</li>
+                            <li>Credit to seller wallet (90%)</li>
+                            <li>Credit to admin wallet (10% platform fee)</li>
+                        </ul>
+                    </div>
+                    <div class="flow-step">
+                        <strong>6. Database Operations:</strong>
+                        <ul>
+                            <li>Create Order record</li>
+                            <li>Create Transaction records (3 entries)</li>
+                            <li>Update wallet balances</li>
+                        </ul>
+                    </div>
+                    <div class="flow-step">
+                        <strong>7. Notifications:</strong>
+                        <ul>
+                            <li>Send notification to seller</li>
+                            <li>Send email to buyer and seller</li>
+                        </ul>
+                    </div>
+                    <div class="flow-step">
+                        <strong>8. Response:</strong> Redirect to order detail page
+                    </div>
+                </div>
+
+                <h3>5.3 File Structure & Responsibilities</h3>
+                <table>
+                    <tr>
+                        <th>File</th>
+                        <th>Purpose</th>
+                        <th>Key Functions/Classes</th>
+                    </tr>
+                    <tr>
+                        <td>app.py</td>
+                        <td>Application entry point</td>
+                        <td>create_app(), main startup</td>
+                    </tr>
+                    <tr>
+                        <td>config.py</td>
+                        <td>Configuration management</td>
+                        <td>Config classes (Dev, Prod, Test)</td>
+                    </tr>
+                    <tr>
+                        <td>models.py</td>
+                        <td>Database models (ORM)</td>
+                        <td>User, Service, Order, etc. (16 models)</td>
+                    </tr>
+                    <tr>
+                        <td>routes.py</td>
+                        <td>Main application routes</td>
+                        <td>All blueprints and route handlers</td>
+                    </tr>
+                    <tr>
+                        <td>routes_chat.py</td>
+                        <td>AskVera AI chatbot routes</td>
+                        <td>/chat/ask, /chat/init</td>
+                    </tr>
+                    <tr>
+                        <td>extensions.py</td>
+                        <td>Flask extensions initialization</td>
+                        <td>db, login_manager, socketio, oauth, mail</td>
+                    </tr>
+                    <tr>
+                        <td>payment_system.py</td>
+                        <td>Payment & wallet management</td>
+                        <td>PaymentGateway, WalletManager classes</td>
+                    </tr>
+                    <tr>
+                        <td>managers.py</td>
+                        <td>Business logic managers</td>
+                        <td>OrderManager, NotificationManager</td>
+                    </tr>
+                    <tr>
+                        <td>chat_manager.py</td>
+                        <td>AI chatbot logic</td>
+                        <td>ChatManager class (Groq AI integration)</td>
+                    </tr>
+                    <tr>
+                        <td>events.py</td>
+                        <td>SocketIO event handlers</td>
+                        <td>Real-time chat events</td>
+                    </tr>
+                    <tr>
+                        <td>email_utils.py</td>
+                        <td>Email sending functions</td>
+                        <td>send_email(), order emails, etc.</td>
+                    </tr>
+                    <tr>
+                        <td>certificate_generator.py</td>
+                        <td>PDF certificate generation</td>
+                        <td>generate_certificate()</td>
+                    </tr>
+                    <tr>
+                        <td>init_db.py</td>
+                        <td>Database initialization</td>
+                        <td>create_default_admin(), seed_categories()</td>
+                    </tr>
+                    <tr>
+                        <td>migrate_db.py</td>
+                        <td>Database migrations</td>
+                        <td>run_migrations() - add missing columns</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Section 6: Features -->
+            <div class="section" id="features">
+                <h2>6. ⚡ Key Features Implementation</h2>
+
+                <h3>6.1 User Authentication</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> routes.py (auth_bp), models.py (User model)<br>
+                    <strong>Features:</strong>
+                    <ul>
+                        <li>Registration with email verification</li>
+                        <li>Login with password hashing (Werkzeug)</li>
+                        <li>Google OAuth integration (Authlib)</li>
+                        <li>Session management (Flask-Login)</li>
+                        <li>Role-based access (client, provider, admin)</li>
+                    </ul>
+                </div>
+
+                <h3>6.2 Wallet System</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> payment_system.py, routes.py (user_bp)<br>
+                    <strong>Payment Flow:</strong>
+                    <ol>
+                        <li><strong>Add Money:</strong> Client/Provider adds money via card/UPI</li>
+                        <li><strong>Order Payment:</strong> 
+                            <ul>
+                                <li>Buyer pays 100% from wallet</li>
+                                <li>90% credited to seller wallet</li>
+                                <li>10% platform fee to admin wallet</li>
+                            </ul>
+                        </li>
+                        <li><strong>Refund:</strong> On order rejection, full refund to buyer + reverse seller/admin credits</li>
+                    </ol>
+                    <strong>Transaction Types:</strong>
+                    <ul>
+                        <li><strong>Credit:</strong> Money added (green icon)</li>
+                        <li><strong>Debit:</strong> Money deducted (red icon)</li>
+                    </ul>
+                </div>
+
+                <h3>6.3 Order Management</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> routes.py, managers.py (OrderManager)<br>
+                    <strong>Order Lifecycle:</strong>
+                    <ol>
+                        <li><strong>Pending:</strong> Order placed, waiting for seller acceptance</li>
+                        <li><strong>In Progress:</strong> Seller accepted, work in progress</li>
+                        <li><strong>Completed:</strong> Work delivered, certificate issued</li>
+                        <li><strong>Cancelled:</strong> Rejected by seller (reason mandatory)</li>
+                    </ol>
+                    <strong>Key Features:</strong>
+                    <ul>
+                        <li>Mandatory rejection reason when seller rejects</li>
+                        <li>Automatic refund on rejection</li>
+                        <li>Real-time chat between buyer and seller</li>
+                        <li>Order tracking and status updates</li>
+                    </ul>
+                </div>
+
+                <h3>6.4 Certificate System</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> certificate_generator.py, routes.py<br>
+                    <strong>Process:</strong>
+                    <ol>
+                        <li>Order marked as completed by seller</li>
+                        <li>System auto-generates PDF certificate</li>
+                        <li>Certificate stored in database with unique ID (CERT-XXXXXX)</li>
+                        <li>Buyer receives notification with download link</li>
+                        <li>Certificate can be verified using cert_id</li>
+                    </ol>
+                    <strong>Certificate Contains:</strong>
+                    <ul>
+                        <li>Student name</li>
+                        <li>Skill/service name</li>
+                        <li>Provider name</li>
+                        <li>Issue date</li>
+                        <li>Unique certificate ID</li>
+                        <li>QR code for verification</li>
+                    </ul>
+                </div>
+
+                <h3>6.5 Real-time Chat</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> events.py, routes.py, templates/user/order_detail.html<br>
+                    <strong>Technology:</strong> Flask-SocketIO (WebSocket)<br>
+                    <strong>Features:</strong>
+                    <ul>
+                        <li>Real-time messaging between buyer and seller</li>
+                        <li>Chat linked to specific order</li>
+                        <li>Message history stored in database</li>
+                        <li>Online/offline status indicators</li>
+                        <li>Hide/unhide chat conversations</li>
+                    </ul>
+                </div>
+
+                <h3>6.6 Booking & Availability System</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> routes.py (availability_bp), models.py<br>
+                    <strong>How it Works:</strong>
+                    <ol>
+                        <li>Provider creates availability slots (date + time)</li>
+                        <li>Client books a slot when placing order</li>
+                        <li>Provider approves/rejects booking request</li>
+                        <li>Once approved, order can be accepted</li>
+                        <li>Slot marked as booked</li>
+                    </ol>
+                </div>
+
+                <h3>6.7 AskVera AI Chatbot</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> chat_manager.py, routes_chat.py<br>
+                    <strong>Technology:</strong> Groq AI (LLaMA 3.3 70B model)<br>
+                    <strong>Features:</strong>
+                    <ul>
+                        <li>Context-aware responses based on user role</li>
+                        <li>Different suggestions for guest, client, provider, admin</li>
+                        <li>Knows about all platform features</li>
+                        <li>Provides help with wallet, orders, certificates, etc.</li>
+                        <li>Real-time responses</li>
+                    </ul>
+                </div>
+
+                <h3>6.8 Admin Features</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> routes.py (admin_bp), templates/admin/*<br>
+                    <strong>Admin Can:</strong>
+                    <ul>
+                        <li>View all users, services, orders</li>
+                        <li>Approve/reject service listings</li>
+                        <li>Manage categories</li>
+                        <li>View platform statistics</li>
+                        <li>Receive 10% platform fee from all orders</li>
+                    </ul>
+                    <strong>Admin Restrictions:</strong>
+                    <ul>
+                        <li>Cannot add money to wallet (only receives fees)</li>
+                        <li>Cannot place orders</li>
+                        <li>"Add Money" button hidden</li>
+                        <li>"My Orders" menu hidden</li>
+                    </ul>
+                </div>
+
+                <h3>6.9 Email Notifications</h3>
+                <div class="highlight">
+                    <strong>Files:</strong> email_utils.py, templates/emails/*<br>
+                    <strong>Email Types:</strong>
+                    <ul>
+                        <li>Welcome email on registration</li>
+                        <li>Order placed (to buyer and seller)</li>
+                        <li>Order accepted (to buyer and seller)</li>
+                        <li>Order completed (to buyer and seller)</li>
+                        <li>Order rejected (to buyer with reason)</li>
+                        <li>Booking confirmation/rejection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="section">
+                <h2>📝 Quick Reference Summary</h2>
+                
+                <h3>Flask Concepts Used:</h3>
+                <div class="badge badge-primary">Application Factory</div>
+                <div class="badge badge-success">Blueprints (8)</div>
+                <div class="badge badge-info">Flask-SQLAlchemy ORM</div>
+                <div class="badge badge-warning">Flask-Login</div>
+                <div class="badge badge-danger">Flask-SocketIO</div>
+                <div class="badge badge-primary">Flask-Mail</div>
+                <div class="badge badge-success">Jinja2 Templates</div>
+                <div class="badge badge-info">Configuration Classes</div>
+
+                <h3>Database Summary:</h3>
+                <ul>
+                    <li><strong>Type:</strong> PostgreSQL (Production) / SQLite (Development)</li>
+                    <li><strong>ORM:</strong> SQLAlchemy</li>
+                    <li><strong>Total Tables:</strong> 16</li>
+                    <li><strong>Key Relationships:</strong> User → Services, Orders → User/Service, Certificates → Orders</li>
+                </ul>
+
+                <h3>Project Statistics:</h3>
+                <table>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Count</th>
+                    </tr>
+                    <tr><td>Total Python Files</td><td>15+</td></tr>
+                    <tr><td>Total HTML Templates</td><td>40+</td></tr>
+                    <tr><td>Database Tables</td><td>16</td></tr>
+                    <tr><td>Flask Blueprints</td><td>8</td></tr>
+                    <tr><td>User Roles</td><td>3 (Client, Provider, Admin)</td></tr>
+                    <tr><td>Order Statuses</td><td>4 (Pending, In Progress, Completed, Cancelled)</td></tr>
+                </table>
+
+                <h3>Learning Path Recommendation:</h3>
+                <ol>
+                    <li><strong>Start with:</strong> app.py → Understand application factory pattern</li>
+                    <li><strong>Then:</strong> config.py → Learn configuration management</li>
+                    <li><strong>Next:</strong> models.py → Study database models and relationships</li>
+                    <li><strong>After that:</strong> routes.py → Understand route handlers and blueprints</li>
+                    <li><strong>Then:</strong> payment_system.py → Learn wallet and payment logic</li>
+                    <li><strong>Finally:</strong> templates/ → Study Jinja2 templating</li>
+                </ol>
+
+                <div class="highlight">
+                    <strong>💡 Pro Tip:</strong> Start by running the application and testing features. Then trace the code flow from user action → route → business logic → database → response. This will help you understand how everything connects!
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 30px; background: #f8f9fa; margin-top: 40px;">
+                <h3 style="color: #667eea;">🎉 Happy Learning!</h3>
+                <p>This documentation covers the complete SkillVerse project structure.</p>
+                <p>For questions or clarifications, refer to the actual code files mentioned in each section.</p>
+                <p style="margin-top: 20px; color: #6c757d;">
+                    <strong>Project:</strong> SkillVerse | 
+                    <strong>Framework:</strong> Flask | 
+                    <strong>Database:</strong> PostgreSQL/SQLite
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

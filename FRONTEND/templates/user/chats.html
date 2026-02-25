@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}My Chats - SkillVerse{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light min-vh-100" style="margin-top: 60px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+                    <h3 class="fw-bold">
+                        <span class="text-gradient">Active Conversations</span>
+                    </h3>
+                    <div class="d-flex gap-2">
+                        {% if chats %}
+                        <button onclick="clearAllChats()"
+                            class="btn btn-sm btn-neutral border shadow-sm rounded-pill text-danger d-flex align-items-center gap-2">
+                            <i class="bi bi-trash"></i> <span>Clear All</span>
+                        </button>
+                        {% endif %}
+                        <span class="badge bg-primary rounded-pill px-3 d-flex align-items-center">{{ chats|length }}
+                            Active</span>
+                    </div>
+                </div>
+
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden fade-in-up delay-100"
+                    style="background: var(--card-bg);">
+                    <div class="list-group list-group-flush" id="chatFeed">
+                        {% if chats %}
+                        {% for chat in chats %}
+                        {% set other_user = chat.buyer if chat.seller_id == current_user.id else chat.seller %}
+
+                        <div class="list-group-item p-4 border-bottom border-light chat-item position-relative transition-smooth"
+                            id="chat-{{ chat.id }}">
+                            <div class="d-flex align-items-center">
+                                <!-- Clickable area wrapping avatar and content -->
+                                <a href="{{ url_for('user.order_detail', order_id=chat.id) }}"
+                                    class="d-flex align-items-center flex-grow-1 text-decoration-none min-w-0">
+                                    <!-- Avatar -->
+                                    <div class="position-relative me-4 flex-shrink-0">
+                                        <img src="{{ other_user.get_avatar_url() }}" class="rounded-circle shadow-sm"
+                                            width="60" height="60" alt="{{ other_user.username }}"
+                                            style="object-fit: cover;">
+                                        <span
+                                            class="position-absolute bottom-0 end-0 p-1 border border-white rounded-circle d-none status-indicator"
+                                            id="status-{{ other_user.id }}" style="background-color: #22c55e;">
+                                            <span class="visually-hidden">Online</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="mb-0 fw-bold fs-5 text-dark">{{ other_user.username }}</h6>
+                                            <small class="text-muted fw-medium">
+                                                {{ (chat.updated_at|to_ist).strftime('%b %d, %H:%M') }}
+                                            </small>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <div class="text-muted text-truncate w-75">
+                                                <span
+                                                    class="badge bg-light text-dark border me-2 rounded-pill px-2 py-1"
+                                                    style="font-weight: 500;">
+                                                    {{ chat.status|replace('_', ' ')|title }}
+                                                </span>
+                                                <span class="small">{{ chat.service.title }}</span>
+                                            </div>
+
+                                            {% if chat.messages.count() > 0 %}
+                                            <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle shadow-sm"
+                                                style="width: 24px; height: 24px;">
+                                                <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <!-- Delete Button (always visible on hover) -->
+                                <div class="chat-delete-action ms-3 flex-shrink-0">
+                                    <button onclick="deleteChat(event, {{ chat.id }})"
+                                        class="btn btn-icon btn-sm btn-white border shadow-sm text-danger rounded-circle"
+                                        title="Remove chat">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-5" id="emptyState">
+                            <div class="mb-4">
+                                <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle"
+                                    style="width: 100px; height: 100px;">
+                                    <i class="bi bi-chat-square-heart fs-1 text-muted opacity-50"></i>
+                                </div>
+                            </div>
+                            <h4 class="fw-bold">No messages yet</h4>
+                            <p class="text-muted mb-4 max-w-sm mx-auto">Connect with professionals or clients to start a
+                                conversation.</p>
+                            <a href="{{ url_for('service.browse') }}"
+                                class="btn btn-primary rounded-pill btn-sweep px-4">
+                                Browse Services
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .chat-item {
+        background-color: transparent;
+        border-color: rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.2s ease;
+    }
+
+    [data-bs-theme="dark"] .chat-item {
+        border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .chat-item:hover {
+        background-color: rgba(var(--primary-rgb), 0.05) !important;
+        background-color: var(--bs-light);
+        transform: translateX(5px);
+    }
+
+    [data-bs-theme="dark"] .chat-item:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Delete button visibility */
+    .chat-delete-action {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .chat-item:hover .chat-delete-action {
+        opacity: 1;
+    }
+
+    /* Always show delete button on touch devices */
+    @media (hover: none) {
+        .chat-delete-action {
+            opacity: 1;
+        }
+    }
+
+    .btn-neutral {
+        background: var(--bs-body-bg, #fff);
+        color: var(--bs-body-color);
+        border-color: var(--bs-border-color);
+    }
+
+    .btn-neutral:hover {
+        background: var(--bs-secondary-bg);
+    }
+
+    /* Animations */
+    .fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    const ANIMATION_DURATION = 300;
+
+    // ==========================================
+    // Delete single chat
+    // ==========================================
+    function deleteChat(event, orderId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const el = document.getElementById(`chat-${orderId}`);
+        animateRemoval(el);
+
+        // Send request in background
+        fetch(`/user/chats/delete/${orderId}`, { method: 'POST' })
+            .catch(err => {
+                console.error('Delete chat failed', err);
+            });
+    }
+
+    // ==========================================
+    // Clear all chats
+    // ==========================================
+    function clearAllChats() {
+        if (!confirm('Clear all conversations from your list? They will reappear if new messages are sent.')) return;
+
+        const btn = event.currentTarget;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        const allItems = document.querySelectorAll('.chat-item');
+        allItems.forEach((el, index) => {
+            setTimeout(() => animateRemoval(el), index * 50);
+        });
+
+        fetch('/user/chats/clear-all', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                setTimeout(() => location.reload(), allItems.length * 50 + 300);
+            });
+    }
+
+    // ==========================================
+    // Smooth removal animation
+    // ==========================================
+    function animateRemoval(element) {
+        element.style.height = element.offsetHeight + 'px';
+        element.style.overflow = 'hidden';
+        element.style.transition = `all ${ANIMATION_DURATION}ms ease`;
+
+        requestAnimationFrame(() => {
+            element.style.opacity = '0';
+            element.style.height = '0';
+            element.style.padding = '0';
+            element.style.border = 'none';
+            element.style.marginBottom = '0';
+        });
+
+        setTimeout(() => {
+            element.remove();
+            checkEmptyState();
+        }, ANIMATION_DURATION);
+    }
+
+    // ==========================================
+    // Show empty state when all chats removed
+    // ==========================================
+    function checkEmptyState() {
+        if (document.querySelectorAll('.chat-item').length === 0) {
+            location.reload();
+        }
+    }
+
+    // ==========================================
+    // Socket.IO online status (existing)
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function () {
+        const socket = io();
+        const userIds = [];
+
+        // Collect all target user IDs from the list
+        document.querySelectorAll('.status-indicator').forEach(el => {
+            const uid = el.id.split('-')[1];
+            if (uid) userIds.push(uid);
+        });
+
+        if (userIds.length > 0) {
+            socket.on('connect', () => {
+                // Initial check
+                socket.emit('check_users_status', { user_ids: userIds });
+            });
+
+            socket.on('users_status_response', (data) => {
+                updateStatuses(data);
+            });
+
+            socket.on('user_status', (data) => {
+                // Real-time update for single user
+                const update = {};
+                update[data.user_id] = data.status;
+                updateStatuses(update);
+            });
+        }
+
+        function updateStatuses(statusMap) {
+            for (const [uid, status] of Object.entries(statusMap)) {
+                const badge = document.getElementById(`status-${uid}`);
+                if (badge) {
+                    if (status === 'online') {
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

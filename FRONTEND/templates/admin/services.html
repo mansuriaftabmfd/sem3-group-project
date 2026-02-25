@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Services - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modern_dashboard.css') }}">
+<style>
+    .approval-filter {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-chip {
+        padding: 0.4rem 1.25rem;
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        text-decoration: none;
+    }
+
+    .filter-chip:hover,
+    .filter-chip.active {
+        background: var(--bg-surface-hover);
+        border-color: var(--border-highlight);
+        color: var(--text-primary);
+    }
+
+    [data-bs-theme="dark"] .filter-chip:hover,
+    [data-bs-theme="dark"] .filter-chip.active {
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .filter-chip .count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        border-radius: 99px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        background: var(--icon-bg-amber);
+        color: var(--icon-text-amber);
+        margin-left: 0.5rem;
+        padding: 0 6px;
+    }
+
+    .service-row {
+        display: grid;
+        grid-template-columns: 2.5fr 1fr 1fr 1fr 0.8fr 1.2fr 0.8fr;
+        align-items: center;
+        padding: 1rem 1.75rem;
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background-color 0.15s ease;
+    }
+
+    .service-row:hover {
+        background: var(--bg-surface-hover);
+    }
+
+    [data-bs-theme="dark"] .service-row:hover {
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .service-row-header {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        letter-spacing: 0.05em;
+        padding: 1rem 1.75rem;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    [data-bs-theme="dark"] .service-row-header {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .service-title-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+    }
+
+    .service-thumb {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid var(--border-subtle);
+    }
+
+    .service-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .service-name:hover {
+        color: var(--icon-text-blue);
+    }
+
+    .cell-text {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .cell-price {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .cell-actions {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        border: 1px solid var(--border-subtle);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background: var(--bg-surface-hover);
+        border-color: var(--border-highlight);
+        color: var(--text-primary);
+    }
+
+    .action-btn.approve-btn:hover {
+        background: var(--icon-bg-green);
+        color: var(--icon-text-green);
+        border-color: var(--icon-text-green);
+    }
+
+    .action-btn.edit-btn:hover {
+        background: var(--icon-bg-blue);
+        color: var(--icon-text-blue);
+        border-color: var(--icon-text-blue);
+    }
+
+    .action-btn.delete-btn:hover {
+        background: var(--icon-bg-rose);
+        color: var(--icon-text-rose);
+        border-color: var(--icon-text-rose);
+    }
+
+    @media (max-width: 1024px) {
+        .service-row {
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+        }
+
+        .hide-mobile {
+            display: none;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .service-row {
+            grid-template-columns: 1fr auto;
+            gap: 0.5rem;
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-avatar" style="background: linear-gradient(135deg, #10B981, #065F46);">
+                <i class="bi bi-briefcase-fill"></i>
+            </div>
+            <h1 class="hero-title">Manage Services</h1>
+            <p class="hero-subtitle">{{ services|length }} Total Services on Platform</p>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="bento-grid" style="margin-bottom: 2rem;">
+        <!-- Approved -->
+        <a href="{{ url_for('admin.services') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-emerald"><i class="bi bi-check-circle-fill"></i></div>
+                <span class="trend-pill trend-positive">Live</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ services|selectattr('is_approved')|list|length }}</div>
+                <div class="stat-label">Approved</div>
+            </div>
+        </a>
+
+        <!-- Pending -->
+        <a href="{{ url_for('admin.pending_services') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-amber"><i class="bi bi-clock-history"></i></div>
+                {% if pending_count > 0 %}
+                <span class="trend-pill" style="background: var(--icon-bg-amber); color: var(--icon-text-amber);">Action
+                    Needed</span>
+                {% else %}
+                <span class="trend-pill trend-positive">Clear</span>
+                {% endif %}
+            </div>
+            <div>
+                <div class="stat-value">{{ pending_count }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </a>
+
+        <!-- Rejected -->
+        <div class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-rose"><i class="bi bi-x-circle-fill"></i></div>
+                <span class="trend-pill trend-neutral">Review</span>
+            </div>
+            <div>
+                <div class="stat-value">
+                    {{ services|rejectattr('is_approved')|selectattr('rejection_reason')|list|length }}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+
+        <!-- Total Active -->
+        <div class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-blue"><i class="bi bi-stack"></i></div>
+                <span class="trend-pill trend-neutral">All</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ services|length }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Table Panel -->
+    <div class="panel">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 1rem;">
+            <span class="panel-title">All Services</span>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                {% if pending_count > 0 %}
+                <a href="{{ url_for('admin.pending_services') }}" class="btn-action"
+                    style="color: var(--icon-text-amber); font-weight: 700; border-color: var(--icon-text-amber);">
+                    <i class="bi bi-clock-history"></i>
+                    Pending Approvals
+                    <span
+                        style="background: var(--icon-bg-amber); color: var(--icon-text-amber); padding: 2px 8px; border-radius: 99px; font-size: 0.7rem;">
+                        {{ pending_count }}
+                    </span>
+                </a>
+                {% endif %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn-action">
+                    <i class="bi bi-arrow-left"></i>Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Table Header -->
+        <div class="service-row service-row-header">
+            <span>Service</span>
+            <span>Provider</span>
+            <span>Category</span>
+            <span>Price</span>
+            <span class="hide-mobile">Views</span>
+            <span>Status</span>
+            <span>Actions</span>
+        </div>
+
+        <!-- Table Body -->
+        {% for service in services %}
+        <div class="service-row">
+            <!-- Service Title -->
+            <div class="service-title-cell">
+                <img src="{{ service.get_image_url() }}" class="service-thumb" alt="{{ service.title }}"
+                    onerror="this.src='https://via.placeholder.com/40?text=S'">
+                <a href="{{ url_for('service.detail', service_id=service.id) }}" class="service-name">
+                    {{ service.title }}
+                </a>
+            </div>
+
+            <!-- Provider -->
+            <span class="cell-text">{{ service.provider.username }}</span>
+
+            <!-- Category -->
+            <span class="cell-text">
+                <span class="tag-chip" style="padding: 0.25rem 0.65rem; font-size: 0.7rem; font-weight: 600;
+                    background: var(--bg-surface-hover); color: var(--text-secondary);
+                    border: 1px solid var(--border-subtle); border-radius: 99px;">
+                    {{ service.category.name }}
+                </span>
+            </span>
+
+            <!-- Price -->
+            <span class="cell-price">₹{{ "%.0f"|format(service.price) }}</span>
+
+            <!-- Views -->
+            <span class="cell-text hide-mobile">
+                <i class="bi bi-eye" style="margin-right: 0.25rem; font-size: 0.75rem;"></i>{{ service.view_count }}
+            </span>
+
+            <!-- Approval Status -->
+            <span>
+                {% if service.is_approved %}
+                <span class="status status-completed">Approved</span>
+                {% elif service.rejection_reason %}
+                <span class="status"
+                    style="background: var(--icon-bg-rose); color: var(--icon-text-rose);">Rejected</span>
+                {% else %}
+                <span class="status status-pending">Pending</span>
+                {% endif %}
+            </span>
+
+            <!-- Actions -->
+            <div class="cell-actions">
+                {% if not service.is_approved and not service.rejection_reason %}
+                <form method="POST" action="{{ url_for('admin.approve_service', service_id=service.id) }}">
+                    <button type="submit" class="action-btn approve-btn" title="Approve">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{{ url_for('service.edit', service_id=service.id) }}" class="action-btn edit-btn" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <form method="POST" action="{{ url_for('service.delete', service_id=service.id) }}">
+                    <button type="submit" class="action-btn delete-btn" title="Delete"
+                        onclick="return confirm('PERMANENT DELETE: This will completely remove the service. Continue?')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not services %}
+        <div style="text-align: center; padding: 3rem; color: var(--text-tertiary);">
+            <i class="bi bi-briefcase"
+                style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.75rem;"></i>
+            No services found on the platform.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

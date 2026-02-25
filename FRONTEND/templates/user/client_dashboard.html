@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SkillVerse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modern_dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-avatar">
+                {{ current_user.full_name[:2].upper() if current_user.full_name else current_user.username[:2].upper()
+                }}
+            </div>
+
+            <h1 class="hero-title">Welcome back, {{ current_user.full_name or current_user.username }}</h1>
+            <p class="hero-subtitle">Unified Dashboard - Buyer & Seller Overview</p>
+        </div>
+    </div>
+
+    <!-- Bento Grid -->
+    <div class="bento-grid">
+
+        <!-- Card 1: Upcoming Sessions -->
+        <a href="{{ url_for('user.orders') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-blue"><i class="bi bi-calendar-event"></i></div>
+                <span class="trend-pill trend-positive">+2 Upcoming</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.upcoming_sessions if stats else 0 }}</div>
+                <div class="stat-label">Scheduled Sessions</div>
+            </div>
+        </a>
+
+        <!-- Card 2: Total Orders -->
+        <a href="{{ url_for('user.orders') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-emerald"><i class="bi bi-briefcase"></i></div>
+                <span class="trend-pill trend-positive">Active</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ (orders|default([]))|length }}</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+        </a>
+
+        <!-- Card 3: Saved Services -->
+        <a href="{{ url_for('service.browse') }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-rose"><i class="bi bi-heart"></i></div>
+                <span class="trend-pill trend-neutral">+1 New</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ (favorites|default([]))|length }}</div>
+                <div class="stat-label">Saved Services</div>
+            </div>
+        </a>
+
+        <!-- Card 4: Reviews Given -->
+        <a href="{{ url_for('user.profile', username=current_user.username) }}" class="bento-card">
+            <div class="card-header-row">
+                <div class="icon-box icon-amber"><i class="bi bi-star"></i></div>
+                <span class="trend-pill trend-neutral">Total</span>
+            </div>
+            <div>
+                <div class="stat-value">{{ stats.total_reviews if stats else 0 }}</div>
+                <div class="stat-label">Reviews Given</div>
+            </div>
+        </a>
+
+        <!-- Row 2: Analytics -->
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Spending Analytics</span>
+                <i class="bi bi-pie-chart text-muted"></i>
+            </div>
+            <div class="graph-wrapper">
+                {% if spending_graph %}
+                <img src="data:image/png;base64,{{ spending_graph }}" class="graph-img">
+                {% else %}
+                <span class="text-secondary small">No spending data available.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="panel span-2">
+            <div class="panel-header">
+                <span class="panel-title">Category Distribution</span>
+                <i class="bi bi-bar-chart text-muted"></i>
+            </div>
+            <div class="graph-wrapper">
+                {% if distribution_graph %}
+                <img src="data:image/png;base64,{{ distribution_graph }}" class="graph-img">
+                {% else %}
+                <span class="text-secondary small">No category data available.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 3: Recent Orders Table -->
+        <div class="panel span-4">
+            <div class="panel-header">
+                <span class="panel-title">Recent Orders</span>
+                <a href="{{ url_for('user.orders') }}" class="btn-action">View All</a>
+            </div>
+            <div style="overflow-x: auto;">
+                {% if orders %}
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Provider</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders|default([]) %}
+                        {% if loop.index <= 5 %} <tr
+                            onclick="window.location.href='{{ url_for('user.order_detail', order_id=order.id) }}'"
+                            style="cursor:pointer;">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-box icon-blue" style="width:32px; height:32px; font-size:1rem;"><i
+                                            class="bi bi-box-seam"></i></div>
+                                    <span style="font-weight:600;">{{ order.service.title }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ order.service.provider.get_avatar_url() }}" width="24" height="24"
+                                        class="rounded-circle">
+                                    <span>{{ order.service.provider.username }}</span>
+                                </div>
+                            </td>
+                            <td class="text-secondary">{{ order.created_at.strftime('%b %d') }}</td>
+                            <td>
+                                <span
+                                    class="status {{ 'status-pending' if order.status=='pending' else 'status-active' if order.status=='in_progress' else 'status-completed' }}">
+                                    {{ order.status|replace('_',' ')|title }}
+                                </span>
+                            </td>
+                            <td class="text-end" style="font-weight:700;">₹{{
+                                "%.0f"|format(order.service.price|default(0)) }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-secondary">No orders found.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 4: Recommendations -->
+        <div class="span-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="panel-title" style="font-size:1.25rem;">Recommended For You</h3>
+                <a href="{{ url_for('service.browse') }}" class="btn-action">Browse All</a>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem;">
+                {% if recommendations %}
+                {% for service in recommendations|default([]) %}
+                {% if loop.index <= 4 %} <a href="{{ url_for('service.detail', service_id=service.id) }}">
+                    <div class="bento-card" style="padding:0; min-height:280px;">
+                        <div style="height:140px; background:var(--bg-surface-hover); position:relative;">
+                            <img src="{{ service.get_image_url() }}" style="width:100%; height:100%; object-fit:cover;"
+                                onerror="this.style.display='none';">
+                            <div
+                                style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:white; padding:4px 8px; border-radius:6px; font-size:0.75rem;">
+                                {{ service.category.name }}
+                            </div>
+                        </div>
+                        <div style="padding:1.25rem;">
+                            <h4
+                                style="font-size:1rem; font-weight:700; margin-bottom:0.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                {{ service.title }}</h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-secondary small"><i class="bi bi-star-fill text-warning"></i> {{
+                                    service.get_average_rating() }}</span>
+                                <span style="font-weight:700; color:var(--accent-blue);">₹{{
+                                    "%.0f"|format(service.price|default(0)) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center text-secondary span-4 py-5">Start looking at services to get
+                        recommendations.</div>
+                    {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

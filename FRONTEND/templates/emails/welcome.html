@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SkillVerse</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .content h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-top: 0;
+        }
+
+        .content p {
+            color: #64748b;
+            font-size: 16px;
+            margin: 16px 0;
+        }
+
+        .features {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+
+        .feature-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-item strong {
+            color: #2563eb;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+            color: white;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 24px 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Welcome to SkillVerse</h1>
+        </div>
+
+        <div class="content">
+            <h2>Hello {{ user.username }}!</h2>
+
+            <p>Thank you for joining <strong>SkillVerse</strong> – your trusted platform for connecting skilled
+                professionals with clients.</p>
+
+            <p>We're excited to have you as part of our growing community!</p>
+
+            <div class="features">
+                <div class="feature-item">
+                    <strong>📋 Browse Services:</strong> Explore a wide range of professional services tailored to your
+                    needs.
+                </div>
+                <div class="feature-item">
+                    <strong>💼 Offer Your Skills:</strong> Create and manage your service listings to reach potential
+                    clients.
+                </div>
+                <div class="feature-item">
+                    <strong>💬 Real-Time Chat:</strong> Communicate directly with buyers and sellers seamlessly.
+                </div>
+                <div class="feature-item">
+                    <strong>⭐ Reviews & Ratings:</strong> Build trust through transparent feedback and ratings.
+                </div>
+            </div>
+
+            <p>Ready to get started?</p>
+
+            <center>
+                <a href="{{ url_for('main.index', _external=True) }}" class="cta-button">Explore SkillVerse</a>
+            </center>
+
+            <p style="margin-top: 30px; font-size: 14px; color: #94a3b8;">
+                If you have any questions, feel free to reach out to our support team.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>SkillVerse</strong><br>
+                Connecting talent with opportunity
+            </p>
+            <p style="margin-top: 12px;">
+                © 2025 SkillVerse. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

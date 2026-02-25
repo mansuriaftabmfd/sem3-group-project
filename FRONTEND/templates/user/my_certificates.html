@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}My Certificates | SkillVerse{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold mb-1">🎓 My Certificates</h2>
+            <p class="text-secondary">All your earned achievements in one place</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{{ url_for('main.verify_certificate_page') }}" class="btn btn-outline-warning rounded-pill px-4">
+                <i class="bi bi-patch-check-fill me-2"></i>Verify a Certificate
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% if certificates %}
+        {% for cert in certificates %}
+        <div class="col-lg-4 col-md-6">
+            <div class="workroom-card h-100 fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                <div class="project-card-header d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary-soft text-primary rounded-pill px-3">{{ cert.cert_id }}</span>
+                    <span class="text-secondary small">{{ cert.issued_at.strftime('%b %d, %Y') }}</span>
+                </div>
+
+                <div class="p-4">
+                    <h5 class="fw-bold mb-2">{{ cert.skill_name }}</h5>
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <i class="bi bi-person-badge text-warning"></i>
+                        <span class="text-secondary small">Instructor: <strong>{{ cert.provider.full_name or
+                                cert.provider.username }}</strong></span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="{{ url_for('user.download_certificate', cert_id=cert.cert_id) }}"
+                            class="btn btn-primary rounded-pill flex-grow-1">
+                            <i class="bi bi-download me-2"></i>Download PDF
+                        </a>
+                        <a href="{{ url_for('main.verify_certificate_prefilled', cert_id=cert.cert_id) }}"
+                            class="btn btn-light rounded-pill px-3" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-award text-secondary opacity-25" style="font-size: 5rem;"></i>
+            </div>
+            <h4 class="fw-bold">No certificates yet</h4>
+            <p class="text-secondary mb-4">Complete your first course to earn a certificate of achievement!</p>
+            <a href="{{ url_for('service.browse') }}" class="btn btn-primary rounded-pill px-5">Browse Skills</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

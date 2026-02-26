@@ -28,5 +28,7 @@ Thumbs.db
 # Flask specific cache or instance
 instance/
 
-# Uploaded public images
+# Uploaded public contents
 FRONTEND/static/images/
+FRONTEND/static/uploads/
+FRONTEND/static/certificates/
